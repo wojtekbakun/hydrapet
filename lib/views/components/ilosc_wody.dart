@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hydrapet/view_models/home_page_view_model.dart';
+import 'package:provider/provider.dart';
 
 class IloscWody extends StatefulWidget {
   const IloscWody({super.key});
@@ -8,21 +10,26 @@ class IloscWody extends StatefulWidget {
 }
 
 class _IloscWodyState extends State<IloscWody> {
-  double _value = 333;
+  @override
+  void initState() {
+    super.initState();
+    final viewModel = Provider.of<HomePageViewModel>(context, listen: false);
+    viewModel.loadWaterAmountFromStorage();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final viewModel = Provider.of<HomePageViewModel>(context);
     return Column(
       children: [
         Slider(
             min: 100,
             max: 333,
-            value: _value,
+            value: viewModel.waterAmount,
             onChanged: (value) {
-              setState(() {
-                _value = value;
-              });
+              viewModel.setWaterAmount(value);
             }),
-        Text('${_value.floor().toString()} ml'),
+        Text('${viewModel.waterAmount.floor().toString()} ml'),
       ],
     );
   }

@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 
 class PoraDnia extends StatefulWidget {
   final String poraDnia;
-  final DateTime data;
   const PoraDnia({
     super.key,
     required this.poraDnia,
-    required this.data,
   });
 
   @override

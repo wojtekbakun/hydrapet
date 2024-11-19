@@ -43,20 +43,20 @@ class HomeScreen extends StatelessWidget {
                   'Godziny lania wody',
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
-                Padding(
+                const Padding(
                   padding: EdgeInsets.symmetric(vertical: 24.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       PoraDnia(
-                          poraDnia: 'Rano',
-                          data: DateTime(DateTime.april, 7, 30, 10, 0)),
+                        poraDnia: 'Rano',
+                      ),
                       PoraDnia(
-                          poraDnia: 'Południe',
-                          data: DateTime(DateTime.april, 12, 30, 14, 0)),
+                        poraDnia: 'Południe',
+                      ),
                       PoraDnia(
-                          poraDnia: 'Wieczór',
-                          data: DateTime(DateTime.april, 18, 30, 20, 0)),
+                        poraDnia: 'Wieczór',
+                      ),
                     ],
                   ),
                 ),
