@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hydrapet/views/components/ilosc_wody.dart';
 import 'package:hydrapet/views/components/nazwa_dnia.dart';
 import 'package:hydrapet/views/components/pora_dnia.dart';
+import 'package:hydrapet/views/components/zapisz_dane.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -67,6 +68,14 @@ class HomeScreen extends StatelessWidget {
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 24.0),
                   child: IloscWody(),
+                ),
+                const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ZapiszDane(),
+                  ],
                 ),
               ],
             ),

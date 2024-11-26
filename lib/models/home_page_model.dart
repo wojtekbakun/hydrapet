@@ -6,6 +6,7 @@ class HomePageModel {
     final prefs = await SharedPreferences.getInstance();
 
     await prefs.setDouble('waterAmount', value);
+
     debugPrint('Water amount saved: $value');
   }
 

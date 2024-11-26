@@ -14,7 +14,7 @@ class _IloscWodyState extends State<IloscWody> {
   void initState() {
     super.initState();
     final viewModel = Provider.of<HomePageViewModel>(context, listen: false);
-    viewModel.loadWaterAmountFromStorage();
+    viewModel.loadWaterAmountFromLocalStorage();
   }
 
   @override
@@ -27,7 +27,7 @@ class _IloscWodyState extends State<IloscWody> {
             max: 333,
             value: viewModel.waterAmount,
             onChanged: (value) {
-              viewModel.setWaterAmount(value);
+              viewModel.updateWaterAmount(value);
             }),
         Text('${viewModel.waterAmount.floor().toString()} ml'),
       ],
