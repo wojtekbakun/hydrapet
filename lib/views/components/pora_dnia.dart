@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:hydrapet/data/data_models/schedule_model.dart';
 import 'package:hydrapet/view_models/home_page_view_model.dart';
-import 'package:provider/provider.dart';
 
 class PoraDnia extends StatefulWidget {
+  final HomePageViewModel viewModel;
   final PartOfTheDay partOfTheDay;
   const PoraDnia({
     super.key,
+    required this.viewModel,
     required this.partOfTheDay,
   });
 
@@ -15,16 +16,8 @@ class PoraDnia extends StatefulWidget {
 }
 
 class _PoraDniaState extends State<PoraDnia> {
-  String poraDnia = 'ustaw';
+  String poraDnia = 'set';
   TimeOfDay timeOfDay = TimeOfDay.now();
-  late HomePageViewModel viewModel;
-
-  @override
-  void initState() {
-    super.initState();
-    viewModel = Provider.of<HomePageViewModel>(context, listen: false);
-    //viewModel.repository.getScheduleFromLocalStorage();
-  }
 
   Future<dynamic> displayTimePicker(BuildContext context) async {
     TimeOfDay? time =
@@ -34,7 +27,7 @@ class _PoraDniaState extends State<PoraDnia> {
       setState(() {
         poraDnia = "${time.hour}:${time.minute < 10 ? '0' : ''}${time.minute}";
         //!TODO dodać zapis czasu do konkretnej pory dnia
-        //viewModel.updateTime(widget.partOfTheDay, time);
+        widget.viewModel.addOnePartOfTheDay(widget.partOfTheDay, time);
       });
     }
   }
@@ -54,11 +47,13 @@ class _PoraDniaState extends State<PoraDnia> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(partOfTheDayToString(widget.partOfTheDay)),
+        Text(
+          partOfTheDayToString(widget.partOfTheDay),
+        ),
         TextButton(
           onPressed: () => displayTimePicker(context),
           child: Text(
-            poraDnia,
+            widget.viewModel.getTimeString(widget.partOfTheDay),
             style: Theme.of(context).textTheme.labelSmall,
           ),
         ),

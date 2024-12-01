@@ -7,8 +7,8 @@ class ScheduleRepository {
     final prefs = await SharedPreferences.getInstance();
     prefs.setDouble('water_amount', schedule.waterAmount ?? 100);
     prefs.setString('morningTime', schedule.morningTime.toString());
-    prefs.setString('afternoonTime', schedule.morningTime.toString());
-    prefs.setString('eveningTime', schedule.morningTime.toString());
+    prefs.setString('afternoonTime', schedule.afternoonTime.toString());
+    prefs.setString('eveningTime', schedule.eveningTime.toString());
     debugPrint(
         "Repo zapisało dane: \n--- water:${schedule.waterAmount}, \n--- morning: ${schedule.morningTime}");
   }
@@ -60,5 +60,20 @@ class ScheduleRepository {
   void changeEveningTime(ScheduleModel schedule, TimeOfDay newTime) {
     schedule.eveningTime = newTime;
     debugPrint('Zmieniono czas na: ${schedule.eveningTime}');
+  }
+
+  void changeTime(
+      ScheduleModel schedule, PartOfTheDay partOfTheDay, TimeOfDay newTime) {
+    switch (partOfTheDay) {
+      case PartOfTheDay.morning:
+        changeMorningTime(schedule, newTime);
+        break;
+      case PartOfTheDay.afternoon:
+        changeAfternoonTime(schedule, newTime);
+        break;
+      case PartOfTheDay.evening:
+        changeEveningTime(schedule, newTime);
+        break;
+    }
   }
 }
