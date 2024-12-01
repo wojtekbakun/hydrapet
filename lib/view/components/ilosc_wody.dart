@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:hydrapet/view_models/home_page_view_model.dart';
+import 'package:hydrapet/view_model/schedule_view_model.dart';
 
 class IloscWody extends StatefulWidget {
-  final HomePageViewModel viewModel;
+  final ScheduleViewModel viewModel;
   const IloscWody({super.key, required this.viewModel});
 
   @override

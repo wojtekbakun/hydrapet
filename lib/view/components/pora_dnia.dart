@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:hydrapet/data/data_models/schedule_model.dart';
-import 'package:hydrapet/view_models/home_page_view_model.dart';
+import 'package:hydrapet/model/schedule_model.dart';
+import 'package:hydrapet/view_model/schedule_view_model.dart';
 
 class PoraDnia extends StatefulWidget {
-  final HomePageViewModel viewModel;
+  final ScheduleViewModel viewModel;
   final PartOfTheDay partOfTheDay;
   const PoraDnia({
     super.key,

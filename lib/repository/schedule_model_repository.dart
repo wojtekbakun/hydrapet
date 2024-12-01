@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hydrapet/data/data_models/schedule_model.dart';
+import 'package:hydrapet/model/schedule_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ScheduleRepository {

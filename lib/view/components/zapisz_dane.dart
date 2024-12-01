@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hydrapet/view_models/home_page_view_model.dart';
+import 'package:hydrapet/view_model/schedule_view_model.dart';
 import 'package:provider/provider.dart';
 
 class ZapiszDane extends StatefulWidget {
@@ -10,12 +10,12 @@ class ZapiszDane extends StatefulWidget {
 }
 
 class _ZapiszDaneState extends State<ZapiszDane> {
-  late HomePageViewModel viewModel;
+  late ScheduleViewModel viewModel;
 
   @override
   void initState() {
     super.initState();
-    viewModel = Provider.of<HomePageViewModel>(context, listen: false);
+    viewModel = Provider.of<ScheduleViewModel>(context, listen: false);
     //viewModel.repository.getScheduleFromLocalStorage();
   }
 

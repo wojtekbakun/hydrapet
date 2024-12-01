@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:hydrapet/data/data_models/schedule_model.dart';
-import 'package:hydrapet/data/repository/schedule_model_repository.dart';
+import 'package:hydrapet/model/schedule_model.dart';
+import 'package:hydrapet/repository/schedule_model_repository.dart';
 
-class HomePageViewModel extends ChangeNotifier {
+class ScheduleViewModel extends ChangeNotifier {
   ScheduleModel _schedule = ScheduleModel();
   ScheduleModel get schedule => _schedule;
 
@@ -15,7 +15,7 @@ class HomePageViewModel extends ChangeNotifier {
   Map<PartOfTheDay, TimeOfDay?> get unsavedTimes => _unsavedTimes;
 
   ScheduleRepository repository;
-  HomePageViewModel({required this.repository}) {
+  ScheduleViewModel({required this.repository}) {
     loadScheduleFromLocalStorage();
   }
 

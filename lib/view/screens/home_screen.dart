@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:hydrapet/data/data_models/schedule_model.dart';
-import 'package:hydrapet/models/mqtt_server_client.dart' as mqtt;
-import 'package:hydrapet/view_models/home_page_view_model.dart';
-import 'package:hydrapet/views/components/ilosc_wody.dart';
-import 'package:hydrapet/views/components/nazwa_dnia.dart';
-import 'package:hydrapet/views/components/pora_dnia.dart';
-import 'package:hydrapet/views/components/zapisz_dane.dart';
+import 'package:hydrapet/model/schedule_model.dart';
+import 'package:hydrapet/model/mqtt_server_client.dart' as mqtt;
+import 'package:hydrapet/view_model/schedule_view_model.dart';
+import 'package:hydrapet/view/components/ilosc_wody.dart';
+import 'package:hydrapet/view/components/nazwa_dnia.dart';
+import 'package:hydrapet/view/components/pora_dnia.dart';
+import 'package:hydrapet/view/components/zapisz_dane.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -16,7 +16,7 @@ class HomeScreen extends StatelessWidget {
     //mqtt.main();
     return MaterialApp(
       home: Scaffold(
-        body: Consumer<HomePageViewModel>(
+        body: Consumer<ScheduleViewModel>(
           builder: (context, viewModel, child) => SafeArea(
             child: Center(
                 child: Padding(
