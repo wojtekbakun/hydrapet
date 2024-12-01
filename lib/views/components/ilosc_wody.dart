@@ -25,11 +25,11 @@ class _IloscWodyState extends State<IloscWody> {
         Slider(
             min: 100,
             max: 333,
-            value: viewModel.waterAmount,
+            value: viewModel.schedule.waterAmount ?? 100,
             onChanged: (value) {
               viewModel.updateWaterAmount(value);
             }),
-        Text('${viewModel.waterAmount.floor().toString()} ml'),
+        Text('${viewModel.schedule.waterAmount?.floor().toString()} ml'),
       ],
     );
   }

@@ -16,13 +16,13 @@ class _ZapiszDaneState extends State<ZapiszDane> {
   void initState() {
     super.initState();
     viewModel = Provider.of<HomePageViewModel>(context, listen: false);
-    viewModel.loadAllDataFromLocalStorage();
+    //viewModel.repository.getScheduleFromLocalStorage();
   }
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
-      onPressed: () => viewModel.saveAllDataToLocalStorage(),
+      onPressed: () => viewModel.saveScheduleToLocalStorage(),
       child: const Row(
         children: [
           Icon(Icons.add),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hydrapet/data/data_models/schedule_model.dart';
+import 'package:hydrapet/models/mqtt_server_client.dart' as mqtt;
 import 'package:hydrapet/views/components/ilosc_wody.dart';
 import 'package:hydrapet/views/components/nazwa_dnia.dart';
 import 'package:hydrapet/views/components/pora_dnia.dart';
@@ -9,6 +11,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //mqtt.main();
     return MaterialApp(
       home: Scaffold(
         body: SafeArea(
@@ -50,13 +53,13 @@ class HomeScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       PoraDnia(
-                        poraDnia: 'Rano',
+                        partOfTheDay: PartOfTheDay.morning,
                       ),
                       PoraDnia(
-                        poraDnia: 'Południe',
+                        partOfTheDay: PartOfTheDay.afternoon,
                       ),
                       PoraDnia(
-                        poraDnia: 'Wieczór',
+                        partOfTheDay: PartOfTheDay.evening,
                       ),
                     ],
                   ),
