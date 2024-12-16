@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hydrapet/model/schedule_model.dart';
-import 'package:hydrapet/model/mqtt_server_client.dart' as mqtt;
 import 'package:hydrapet/view_model/schedule_view_model.dart';
 import 'package:hydrapet/view/components/ilosc_wody.dart';
-import 'package:hydrapet/view/components/nazwa_dnia.dart';
 import 'package:hydrapet/view/components/pora_dnia.dart';
 import 'package:hydrapet/view/components/zapisz_dane.dart';
 import 'package:provider/provider.dart';
@@ -52,22 +50,8 @@ class HomeScreen extends StatelessWidget {
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 24.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        PoraDnia(
-                          viewModel: viewModel,
-                          partOfTheDay: PartOfTheDay.morning,
-                        ),
-                        PoraDnia(
-                          viewModel: viewModel,
-                          partOfTheDay: PartOfTheDay.afternoon,
-                        ),
-                        PoraDnia(
-                          viewModel: viewModel,
-                          partOfTheDay: PartOfTheDay.evening,
-                        ),
-                      ],
+                    child: PoraDnia(
+                      viewModel: viewModel,
                     ),
                   ),
                   Text(

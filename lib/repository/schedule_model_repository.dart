@@ -1,45 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:hydrapet/model/schedule_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class ScheduleRepository {
   Future<void> saveScheduleToLocalStorage(ScheduleModel schedule) async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setDouble('water_amount', schedule.waterAmount ?? 100);
-    prefs.setString('morningTime', schedule.morningTime.toString());
-    prefs.setString('afternoonTime', schedule.afternoonTime.toString());
-    prefs.setString('eveningTime', schedule.eveningTime.toString());
-    debugPrint(
-        "Repo zapisało dane: \n--- water:${schedule.waterAmount}, \n--- morning: ${schedule.morningTime}");
+    String jsonString = jsonEncode(schedule.toJson());
+    await prefs.setString('scheduleModel', jsonString);
   }
 
-  Future<ScheduleModel> getScheduleFromLocalStorage() async {
-    ScheduleModel schedule = ScheduleModel();
+  Future<ScheduleModel?> loadScheduleModel() async {
     final prefs = await SharedPreferences.getInstance();
-    schedule.waterAmount = prefs.getDouble('water_amount');
-    schedule.morningTime =
-        fromStringToTimeOfDay(prefs.getString('morningTime') ?? '');
-    schedule.afternoonTime =
-        fromStringToTimeOfDay(prefs.getString('afternoonTime') ?? '');
-    schedule.eveningTime =
-        fromStringToTimeOfDay(prefs.getString('eveningTime') ?? '');
+    String? jsonString = prefs.getString('scheduleModel');
 
-    debugPrint(
-        'Odczytano czasy z pamieci: ${schedule.morningTime} ${schedule.afternoonTime} ${schedule.eveningTime} ${schedule.waterAmount}');
-    return schedule;
-  }
-
-  TimeOfDay fromStringToTimeOfDay(String timeString) {
-    final RegExp regExp = RegExp(r"TimeOfDay\((\d+):(\d+)\)");
-    final match = regExp.firstMatch(timeString);
-
-    if (match != null) {
-      final hour = int.parse(match.group(1)!);
-      final minute = int.parse(match.group(2)!);
-      return TimeOfDay(hour: hour, minute: minute);
-    } else {
-      throw const FormatException("Invalid TimeOfDay format");
+    if (jsonString != null) {
+      Map<String, dynamic> jsonMap = jsonDecode(jsonString);
+      return ScheduleModel.fromJson(jsonMap);
     }
+    return null;
   }
 
   void changeWaterAmount(ScheduleModel schedule, double newWaterAmount) {
@@ -47,33 +26,24 @@ class ScheduleRepository {
     debugPrint("Zmieniono ilość wody na ${schedule.waterAmount}");
   }
 
-  void changeMorningTime(ScheduleModel schedule, TimeOfDay newTime) {
-    schedule.morningTime = newTime;
-    debugPrint('Zmieniono czas na: ${schedule.morningTime}');
+  void addNewWateringTime(ScheduleModel schedule, DateTime newTime) {
+    schedule.wateringTimes?.add(newTime);
+    debugPrint(
+        'Dodano nowy czas: ${schedule.wateringTimes} -> $newTime, a ilosc wody to :${schedule.waterAmount}');
   }
 
-  void changeAfternoonTime(ScheduleModel schedule, TimeOfDay newTime) {
-    schedule.afternoonTime = newTime;
-    debugPrint('Zmieniono czas na: ${schedule.afternoonTime}');
-  }
-
-  void changeEveningTime(ScheduleModel schedule, TimeOfDay newTime) {
-    schedule.eveningTime = newTime;
-    debugPrint('Zmieniono czas na: ${schedule.eveningTime}');
-  }
-
-  void changeTime(
-      ScheduleModel schedule, PartOfTheDay partOfTheDay, TimeOfDay newTime) {
-    switch (partOfTheDay) {
-      case PartOfTheDay.morning:
-        changeMorningTime(schedule, newTime);
-        break;
-      case PartOfTheDay.afternoon:
-        changeAfternoonTime(schedule, newTime);
-        break;
-      case PartOfTheDay.evening:
-        changeEveningTime(schedule, newTime);
-        break;
-    }
-  }
+  // void changeTime(
+  //     ScheduleModel schedule, PartOfTheDay partOfTheDay, TimeOfDay newTime) {
+  //   switch (partOfTheDay) {
+  //     case PartOfTheDay.morning:
+  //       changeMorningTime(schedule, newTime);
+  //       break;
+  //     case PartOfTheDay.afternoon:
+  //       changeAfternoonTime(schedule, newTime);
+  //       break;
+  //     case PartOfTheDay.evening:
+  //       changeEveningTime(schedule, newTime);
+  //       break;
+  //   }
+  // }
 }

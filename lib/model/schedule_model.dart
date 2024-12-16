@@ -1,21 +1,28 @@
-import 'package:flutter/material.dart';
-
 class ScheduleModel {
-  TimeOfDay? morningTime = const TimeOfDay(hour: 8, minute: 00);
-  TimeOfDay? afternoonTime = const TimeOfDay(hour: 12, minute: 00);
-  TimeOfDay? eveningTime = const TimeOfDay(hour: 16, minute: 00);
-  double? waterAmount = 100;
+  List<DateTime>? wateringTimes;
+  double? waterAmount;
 
   ScheduleModel({
-    this.morningTime,
-    this.afternoonTime,
-    this.eveningTime,
-    this.waterAmount,
-  });
-}
+    List<DateTime>? wateringTimes,
+    this.waterAmount = 100,
+  }) : wateringTimes = wateringTimes ?? [];
 
-enum PartOfTheDay {
-  morning,
-  afternoon,
-  evening,
+  // Konwersja do JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'wateringTimes':
+          wateringTimes?.map((dateTime) => dateTime.toIso8601String()).toList(),
+      'waterAmount': waterAmount,
+    };
+  }
+
+  // Tworzenie obiektu z JSON
+  factory ScheduleModel.fromJson(Map<String, dynamic> json) {
+    return ScheduleModel(
+      wateringTimes: (json['wateringTimes'] as List<dynamic>?)
+          ?.map((timestamp) => DateTime.parse(timestamp))
+          .toList(),
+      waterAmount: json['waterAmount'] as double?,
+    );
+  }
 }

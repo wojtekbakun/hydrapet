@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:hydrapet/model/schedule_model.dart';
 import 'package:hydrapet/view_model/schedule_view_model.dart';
 
 class PoraDnia extends StatefulWidget {
   final ScheduleViewModel viewModel;
-  final PartOfTheDay partOfTheDay;
+
   const PoraDnia({
     super.key,
     required this.viewModel,
-    required this.partOfTheDay,
   });
 
   @override
@@ -17,47 +15,96 @@ class PoraDnia extends StatefulWidget {
 
 class _PoraDniaState extends State<PoraDnia> {
   String poraDnia = 'set';
-  TimeOfDay timeOfDay = TimeOfDay.now();
 
-  Future<dynamic> displayTimePicker(BuildContext context) async {
-    TimeOfDay? time =
-        await showTimePicker(context: context, initialTime: timeOfDay);
+  Future<DateTime?> displayDatePicker(BuildContext context) => showDatePicker(
+      context: context, firstDate: DateTime.now(), lastDate: DateTime(2030));
 
-    if (time != null) {
-      setState(() {
-        poraDnia = "${time.hour}:${time.minute < 10 ? '0' : ''}${time.minute}";
-        //!TODO dodać zapis czasu do konkretnej pory dnia
-        widget.viewModel.addOnePartOfTheDay(widget.partOfTheDay, time);
-      });
-    }
-  }
+  Future<dynamic> chooseDate(BuildContext context) async {
+    final pickedDate = await displayDatePicker(context);
 
-  String partOfTheDayToString(PartOfTheDay partOfTheDay) {
-    switch (partOfTheDay) {
-      case PartOfTheDay.morning:
-        return 'Rano';
-      case PartOfTheDay.afternoon:
-        return 'Południe';
-      case PartOfTheDay.evening:
-        return 'Wieczór';
+    if (pickedDate != null) {
+      TimeOfDay? pickedTimeOfDay =
+          await showTimePicker(context: context, initialTime: TimeOfDay.now());
+
+      if (pickedTimeOfDay != null) {
+        setState(() {
+          poraDnia =
+              "${pickedTimeOfDay.hour}:${pickedTimeOfDay.minute < 10 ? '0' : ''}${pickedTimeOfDay.minute}";
+
+          final newDateTime = DateTime(
+            pickedDate.year,
+            pickedDate.month,
+            pickedDate.day,
+            pickedTimeOfDay.hour,
+            pickedTimeOfDay.minute,
+          );
+          widget.viewModel.addNewWateringTime(newDateTime);
+          debugPrint('wybrana data: $newDateTime');
+        });
+      } else {
+        debugPrint('Nie wybrano godziny');
+        return;
+      }
+    } else {
+      debugPrint('Nie wybrano daty');
+      return;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          partOfTheDayToString(widget.partOfTheDay),
+    return SizedBox(
+      height: 100,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          IconButton(
+            onPressed: () => chooseDate(context),
+            icon: const Icon(Icons.add),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount:
+                  widget.viewModel.getSchedule().wateringTimes?.length ?? 1,
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (BuildContext context, int index) {
+                return TimeForWaterRefilling(
+                  viewModel: widget.viewModel,
+                  index: index,
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class TimeForWaterRefilling extends StatelessWidget {
+  final ScheduleViewModel viewModel;
+  final int index;
+  const TimeForWaterRefilling(
+      {super.key, required this.viewModel, required this.index});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Container(
+        width: 120,
+        decoration: BoxDecoration(
+          color: Colors.blue,
+          borderRadius: BorderRadius.circular(10),
         ),
-        TextButton(
-          onPressed: () => displayTimePicker(context),
+        child: Center(
           child: Text(
-            widget.viewModel.getTimeString(widget.partOfTheDay),
-            style: Theme.of(context).textTheme.labelSmall,
+            '${viewModel.getSchedule().wateringTimes?[index].hour}:${viewModel.getSchedule().wateringTimes?[index].minute}',
+            style: TextStyle(color: Colors.white, fontSize: 20),
           ),
         ),
-      ],
+      ),
     );
   }
 }

@@ -6,14 +6,6 @@ class ScheduleViewModel extends ChangeNotifier {
   ScheduleModel _schedule = ScheduleModel();
   ScheduleModel get schedule => _schedule;
 
-  final Map<PartOfTheDay, TimeOfDay?> _unsavedTimes = {
-    PartOfTheDay.morning: null,
-    PartOfTheDay.afternoon: null,
-    PartOfTheDay.evening: null,
-  };
-
-  Map<PartOfTheDay, TimeOfDay?> get unsavedTimes => _unsavedTimes;
-
   ScheduleRepository repository;
   ScheduleViewModel({required this.repository}) {
     loadScheduleFromLocalStorage();
@@ -25,27 +17,8 @@ class ScheduleViewModel extends ChangeNotifier {
 
   void setNewSchedule(ScheduleModel newSchedule) {
     _schedule = newSchedule;
-    debugPrint('Ustawiono nowy schedule: ${_schedule.morningTime}');
+    // debugPrint('Ustawiono nowy schedule: ${_schedule.morningTime}');
     notifyListeners();
-  }
-
-  String getTimeString(PartOfTheDay partOfTheDay) {
-    TimeOfDay? time;
-    switch (partOfTheDay) {
-      case PartOfTheDay.morning:
-        time = _schedule.morningTime;
-      case PartOfTheDay.afternoon:
-        time = _schedule.afternoonTime;
-      case PartOfTheDay.evening:
-        time = _schedule.eveningTime;
-    }
-    if (time == null) {
-      debugPrint('time is null for $partOfTheDay');
-      return 'ustaw';
-    } else {
-      debugPrint('time is not null for $partOfTheDay: $time');
-      return '${time.hour}:${time.minute < 10 ? '0' : ''}${time.minute}';
-    }
   }
 
   void updateWaterAmount(double value) {
@@ -53,46 +26,27 @@ class ScheduleViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateMorningTime(TimeOfDay newTime) {
-    repository.changeMorningTime(_schedule, newTime);
-    notifyListeners();
-  }
-
-  void updateAfternoonTime(TimeOfDay newTime) {
-    repository.changeAfternoonTime(_schedule, newTime);
-    notifyListeners();
-  }
-
-  void updateEveningTime(TimeOfDay newTime) {
-    repository.changeEveningTime(_schedule, newTime);
+  void addNewWateringTime(DateTime newTime) {
+    debugPrint("time in vm: $newTime");
+    repository.addNewWateringTime(_schedule, newTime);
     notifyListeners();
   }
 
   Future<void> loadScheduleFromLocalStorage() async {
     try {
-      final newSchedule = await repository.getScheduleFromLocalStorage();
-      setNewSchedule(newSchedule);
+      final newSchedule = await repository.loadScheduleModel();
+      if (newSchedule != null) {
+        setNewSchedule(newSchedule);
+      }
       debugPrint(
-          'Wczytano dane z lokalnej bazy danych: ${schedule.morningTime} ${schedule.afternoonTime} ${schedule.eveningTime}');
+          'Wczytano dane z lokalnej bazy danych: ${schedule.wateringTimes}');
     } catch (e) {
       debugPrint('[vm] Błąd przy pobieraniu z repo: $e');
     }
   }
 
-  void addOnePartOfTheDay(PartOfTheDay partOfTheDay, TimeOfDay newTime) {
-    repository.changeTime(_schedule, partOfTheDay, newTime);
-    notifyListeners();
-  }
-
-  //tu zapisujemy wszystkie dane do lokalnej bazy danych (dni, pory, ilosc wody)
-  //aktualniue jest tylko ilosc wody bo nie ma jeszcze modeli dla dni i por
   void saveScheduleToLocalStorage() {
-    // for (var part in _unsavedTimes.keys) {
-    //   if (_unsavedTimes[part] != null) {
-    //     debugPrint('Zapisuje dane dla $part');
-    //     repository.changeTime(_schedule, part, _unsavedTimes[part]!);
-    //   }
-    // }
     repository.saveScheduleToLocalStorage(_schedule);
+    debugPrint("Zapisano dane do pamięci lokalnej");
   }
 }
