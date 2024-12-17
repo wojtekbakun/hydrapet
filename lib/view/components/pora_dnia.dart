@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hydrapet/view/components/time_for_water_refilling.dart';
 import 'package:hydrapet/view_model/schedule_view_model.dart';
 
 class PoraDnia extends StatefulWidget {
@@ -77,33 +78,6 @@ class _PoraDniaState extends State<PoraDnia> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class TimeForWaterRefilling extends StatelessWidget {
-  final ScheduleViewModel viewModel;
-  final int index;
-  const TimeForWaterRefilling(
-      {super.key, required this.viewModel, required this.index});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Container(
-        width: 120,
-        decoration: BoxDecoration(
-          color: Colors.blue,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Center(
-          child: Text(
-            '${viewModel.getSchedule().wateringTimes?[index].hour}:${viewModel.getSchedule().wateringTimes?[index].minute}',
-            style: TextStyle(color: Colors.white, fontSize: 20),
-          ),
-        ),
       ),
     );
   }

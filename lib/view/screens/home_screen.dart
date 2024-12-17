@@ -1,78 +1,86 @@
 import 'package:flutter/material.dart';
-import 'package:hydrapet/model/schedule_model.dart';
-import 'package:hydrapet/view_model/schedule_view_model.dart';
-import 'package:hydrapet/view/components/ilosc_wody.dart';
-import 'package:hydrapet/view/components/pora_dnia.dart';
-import 'package:hydrapet/view/components/zapisz_dane.dart';
-import 'package:provider/provider.dart';
+import 'package:hydrapet/view/screens/single_day_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  Future<DateTime?> displayDatePicker(BuildContext context) => showDatePicker(
+      context: context, firstDate: DateTime.now(), lastDate: DateTime(2030));
 
   @override
   Widget build(BuildContext context) {
     //mqtt.main();
-    return MaterialApp(
-      home: Scaffold(
-        body: Consumer<ScheduleViewModel>(
-          builder: (context, viewModel, child) => SafeArea(
-            child: Center(
-                child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Text(
-                  //   'Dni lania wody',
-                  //   style: Theme.of(context).textTheme.headlineSmall,
-                  // ),
-                  // const Padding(
-                  //   padding: EdgeInsets.symmetric(vertical: 24.0),
-                  //   child: SingleChildScrollView(
-                  //     scrollDirection: Axis.horizontal,
-                  //     child: Row(
-                  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  //       children: [
-                  //         NazwaDnia(dzien: 'Pn'),
-                  //         NazwaDnia(dzien: 'Wt'),
-                  //         NazwaDnia(dzien: 'Śr'),
-                  //         NazwaDnia(dzien: 'Cz'),
-                  //         NazwaDnia(dzien: 'Pt'),
-                  //         NazwaDnia(dzien: 'So'),
-                  //         NazwaDnia(dzien: 'Nd'),
-                  //       ],
-                  //     ),
-                  //   ),
-                  // ),
-                  Text(
-                    'Godziny lania wody',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 24.0),
-                    child: PoraDnia(
-                      viewModel: viewModel,
-                    ),
-                  ),
-                  Text(
-                    'Ilość wody',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 24.0),
-                    child: IloscWody(viewModel: viewModel),
-                  ),
-                  const Row(
-                    mainAxisSize: MainAxisSize.min,
+    return Scaffold(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 22.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.7,
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ZapiszDane(),
+                      Text(
+                        'Aktualny poziom wody',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      const Expanded(
+                          child: Center(
+                              child: Text(
+                        '50%',
+                        style: TextStyle(
+                          fontSize: 50,
+                        ),
+                      ))),
                     ],
                   ),
-                ],
-              ),
-            )),
+                ),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.2,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Ustaw plan',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      TextButton(
+                          onPressed: () async {
+                            final pickedDate = await displayDatePicker(context);
+                            if (pickedDate != null) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => SingleDayScreen(
+                                          pickedDate: pickedDate,
+                                        )),
+                              );
+                            } else {
+                              debugPrint('Nie wybrano daty');
+                            }
+                          },
+                          child: const Row(
+                            children: [
+                              Icon(Icons.calendar_today),
+                              Text('Wybierz dzień'),
+                            ],
+                          ))
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
