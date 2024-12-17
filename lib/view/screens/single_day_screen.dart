@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hydrapet/repository/schedule_model_repository.dart';
+import 'package:hydrapet/model/mini_schedule_model.dart';
 import 'package:hydrapet/view/components/time_for_water_refilling.dart';
 import 'package:hydrapet/view_model/schedule_view_model.dart';
 import 'package:provider/provider.dart';
@@ -15,10 +15,9 @@ class SingleDayScreen extends StatefulWidget {
 
 class _SingleDayScreenState extends State<SingleDayScreen> {
   // !TODO - refactor to use provider
-  final ScheduleViewModel viewModel =
-      ScheduleViewModel(repository: ScheduleRepository());
 
-  Future<dynamic> chooseDate(BuildContext context) async {
+  Future<dynamic> chooseDate(
+      BuildContext context, ScheduleViewModel viewModel) async {
     TimeOfDay? pickedTimeOfDay =
         await showTimePicker(context: context, initialTime: TimeOfDay.now());
 
@@ -32,7 +31,8 @@ class _SingleDayScreenState extends State<SingleDayScreen> {
             pickedTimeOfDay.hour,
             pickedTimeOfDay.minute,
           );
-          viewModel.addNewWateringTime(newDateTime);
+          viewModel.addNewWateringTime(newDateTime,
+              MiniScheduleModel(time: pickedTimeOfDay, waterAmount: 122));
           debugPrint('wybrana data: $newDateTime');
         });
       } else {
@@ -78,7 +78,7 @@ class _SingleDayScreenState extends State<SingleDayScreen> {
                       ],
                     ),
                     IconButton(
-                      onPressed: () => chooseDate(context),
+                      onPressed: () => chooseDate(context, viewModel),
                       icon: const Icon(Icons.add),
                     ),
                   ],
@@ -87,8 +87,7 @@ class _SingleDayScreenState extends State<SingleDayScreen> {
                 Expanded(
                   child: ListView.builder(
                     shrinkWrap: true,
-                    itemCount:
-                        viewModel.getSchedule().wateringTimes?.length ?? 1,
+                    itemCount: viewModel.schedule.miniSchedule.length,
                     itemBuilder: (BuildContext context, int index) {
                       return TimeForWaterRefilling(
                           viewModel: viewModel, index: index);

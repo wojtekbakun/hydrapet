@@ -1,28 +1,29 @@
+import 'package:hydrapet/model/mini_schedule_model.dart';
+
 class ScheduleModel {
-  List<DateTime>? wateringTimes;
-  double? waterAmount;
+  DateTime? date;
+  List<MiniScheduleModel> miniSchedule;
 
   ScheduleModel({
-    List<DateTime>? wateringTimes,
-    this.waterAmount = 100,
-  }) : wateringTimes = wateringTimes ?? [];
+    this.date,
+    List<MiniScheduleModel>? miniSchedule,
+  }) : miniSchedule = miniSchedule ?? [];
 
-  // Konwersja do JSON
+  // Konwersja ScheduleModel do JSON
   Map<String, dynamic> toJson() {
     return {
-      'wateringTimes':
-          wateringTimes?.map((dateTime) => dateTime.toIso8601String()).toList(),
-      'waterAmount': waterAmount,
+      'date': date?.toIso8601String(), // Konwersja DateTime na String
+      'miniSchedule': miniSchedule.map((ms) => ms.toJson()).toList(),
     };
   }
 
-  // Tworzenie obiektu z JSON
+  // Tworzenie ScheduleModel z JSON
   factory ScheduleModel.fromJson(Map<String, dynamic> json) {
     return ScheduleModel(
-      wateringTimes: (json['wateringTimes'] as List<dynamic>?)
-          ?.map((timestamp) => DateTime.parse(timestamp))
+      date: json['date'] != null ? DateTime.parse(json['date']) : null,
+      miniSchedule: (json['miniSchedule'] as List<dynamic>?)
+          ?.map((item) => MiniScheduleModel.fromJson(item))
           .toList(),
-      waterAmount: json['waterAmount'] as double?,
     );
   }
 }

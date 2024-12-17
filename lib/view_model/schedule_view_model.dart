@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hydrapet/model/mini_schedule_model.dart';
 import 'package:hydrapet/model/schedule_model.dart';
 import 'package:hydrapet/repository/schedule_model_repository.dart';
 
@@ -21,14 +22,9 @@ class ScheduleViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateWaterAmount(double value) {
-    repository.changeWaterAmount(_schedule, value);
-    notifyListeners();
-  }
-
-  void addNewWateringTime(DateTime newTime) {
+  void addNewWateringTime(DateTime newTime, MiniScheduleModel newMiniSchedule) {
     debugPrint("time in vm: $newTime");
-    repository.addNewWateringTime(_schedule, newTime);
+    repository.addNewMiniSchedule(_schedule, newMiniSchedule);
     notifyListeners();
   }
 
@@ -38,8 +34,8 @@ class ScheduleViewModel extends ChangeNotifier {
       if (newSchedule != null) {
         setNewSchedule(newSchedule);
       }
-      debugPrint(
-          'Wczytano dane z lokalnej bazy danych: ${schedule.wateringTimes}');
+      // debugPrint(
+      //     'Wczytano dane z lokalnej bazy danych: ${schedule.wateringTimes}');
     } catch (e) {
       debugPrint('[vm] Błąd przy pobieraniu z repo: $e');
     }

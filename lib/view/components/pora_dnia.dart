@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hydrapet/model/mini_schedule_model.dart';
 import 'package:hydrapet/view/components/time_for_water_refilling.dart';
 import 'package:hydrapet/view_model/schedule_view_model.dart';
 
@@ -39,7 +40,8 @@ class _PoraDniaState extends State<PoraDnia> {
             pickedTimeOfDay.hour,
             pickedTimeOfDay.minute,
           );
-          widget.viewModel.addNewWateringTime(newDateTime);
+          widget.viewModel.addNewWateringTime(newDateTime,
+              MiniScheduleModel(time: pickedTimeOfDay, waterAmount: 122));
           debugPrint('wybrana data: $newDateTime');
         });
       } else {
@@ -66,8 +68,7 @@ class _PoraDniaState extends State<PoraDnia> {
           ),
           Expanded(
             child: ListView.builder(
-              itemCount:
-                  widget.viewModel.getSchedule().wateringTimes?.length ?? 1,
+              itemCount: widget.viewModel.getSchedule().miniSchedule.length,
               scrollDirection: Axis.horizontal,
               itemBuilder: (BuildContext context, int index) {
                 return TimeForWaterRefilling(

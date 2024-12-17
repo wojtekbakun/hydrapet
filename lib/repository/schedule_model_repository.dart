@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hydrapet/model/mini_schedule_model.dart';
 import 'package:hydrapet/model/schedule_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -21,15 +22,12 @@ class ScheduleRepository {
     return null;
   }
 
-  void changeWaterAmount(ScheduleModel schedule, double newWaterAmount) {
-    schedule.waterAmount = newWaterAmount;
-    debugPrint("Zmieniono ilość wody na ${schedule.waterAmount}");
-  }
-
-  void addNewWateringTime(ScheduleModel schedule, DateTime newTime) {
-    schedule.wateringTimes?.add(newTime);
-    debugPrint(
-        'Dodano nowy czas: ${schedule.wateringTimes} -> $newTime, a ilosc wody to :${schedule.waterAmount}');
+  void addNewMiniSchedule(
+      ScheduleModel schedule, MiniScheduleModel newMiniSchedule) {
+    debugPrint('aktualne miniSchedule: ${schedule.miniSchedule}');
+    debugPrint('ilosc miniSchedule: ${schedule.miniSchedule.length}');
+    schedule.miniSchedule.add(newMiniSchedule);
+    debugPrint('Dodano nowy miniSchedule: ${schedule.miniSchedule}');
   }
 
   // void changeTime(

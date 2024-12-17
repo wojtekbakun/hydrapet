@@ -13,7 +13,7 @@ class TimeForWaterRefilling extends StatelessWidget {
       child: ListTile(
         title: const Text('100ml'),
         subtitle: Text(
-            '${viewModel.schedule.wateringTimes![index].hour}:${viewModel.schedule.wateringTimes![index].minute}'),
+            '${viewModel.schedule.miniSchedule[index].time.hour}:${viewModel.schedule.miniSchedule[index].time.minute}'),
         trailing: IconButton(
           icon: const Icon(Icons.edit),
           onPressed: () {},
