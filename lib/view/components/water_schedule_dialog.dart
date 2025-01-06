@@ -67,7 +67,7 @@ class WaterScheduleDialog {
                 if (waterAmountController.text.isNotEmpty) {
                   final waterAmount =
                       int.tryParse(waterAmountController.text) ?? 0;
-                  isEdit
+                  int retVal = isEdit
                       ? viewModel.editMiniSchedule(
                           index,
                           MiniScheduleModel(
@@ -78,6 +78,15 @@ class WaterScheduleDialog {
                               time: pickedTimeOfDay, waterAmount: waterAmount),
                         );
                   Navigator.pop(context);
+                  retVal == 0
+                      ? null
+                      //show snackbar
+                      : ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                'Błąd - przekroczono maksymalną ilość wody'),
+                          ),
+                        );
                 } else {
                   debugPrint('Nie wybrano ilości wody');
                 }

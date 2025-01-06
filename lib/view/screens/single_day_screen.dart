@@ -42,7 +42,7 @@ class _SingleDayScreenState extends State<SingleDayScreen> {
                           style: Theme.of(context).textTheme.headlineSmall,
                         ),
                         Text(
-                          'Wykorzystano ${viewModel.getTotalWaterAmount()}/1000ml',
+                          'Wykorzystano ${viewModel.getTotalWaterAmount()}/${viewModel.maxWaterAmount}ml',
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                       ],
@@ -51,7 +51,7 @@ class _SingleDayScreenState extends State<SingleDayScreen> {
                       onPressed: () => WaterScheduleDialog(
                               context: context,
                               initialTime: TimeOfDay.now(),
-                              initialWaterAmount: 0)
+                              initialWaterAmount: viewModel.defaultWaterAmount)
                           .show(),
                       icon: const Icon(Icons.add),
                     ),

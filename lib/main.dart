@@ -20,7 +20,7 @@ void main() {
             '/single_day': (context) => SingleDayScreen(
                   pickedDate: DateTime.now(),
                 ),
-            '/settings': (context) => const SettingsScreen(),
+            '/settings': (context) => SettingsScreen(),
           },
           initialRoute: '/',
         )),

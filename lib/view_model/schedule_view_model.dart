@@ -10,9 +10,25 @@ class ScheduleViewModel extends ChangeNotifier {
   DateTime _pickedDate = DateTime.now();
   DateTime get pickedDate => _pickedDate;
 
+  int _defaultWaterAmount = 0;
+  int get defaultWaterAmount => _defaultWaterAmount;
+
+  int _maxWaterAmount = 1000;
+  int get maxWaterAmount => _maxWaterAmount;
+
   ScheduleRepository repository;
   ScheduleViewModel({required this.repository}) {
     // loadScheduleFromLocalStorage();
+  }
+
+  void setDefaultWaterAmount(int newWaterAmount) {
+    _defaultWaterAmount = newWaterAmount;
+    notifyListeners();
+  }
+
+  void setMaxWaterAmount(int newMaxWaterAmount) {
+    _maxWaterAmount = newMaxWaterAmount;
+    notifyListeners();
   }
 
   int getTotalWaterAmount() {
@@ -34,12 +50,18 @@ class ScheduleViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addNewSchedule(MiniScheduleModel newMiniSchedule) {
+  int addNewSchedule(MiniScheduleModel newMiniSchedule) {
     // check if date already exists, if yes then add mini schedule to it else add new schedule to days schedule
+    // ! check if totalWaterAmount is not greater than maxWaterAmount
+    if (getTotalWaterAmount() + newMiniSchedule.waterAmount > maxWaterAmount) {
+      debugPrint('Przekroczono maksymalną ilość wody');
+      return -1;
+    }
+
     if (_schedules.isEmpty) {
       _schedules.add(ScheduleModel(date: _pickedDate, miniSchedule: []));
       addNewMiniSchedule(_schedules[0], newMiniSchedule);
-      return;
+      return 0;
     }
     for (var i = 0; i < schedules.length;) {
       if (_schedules[i].date == _pickedDate) {
@@ -55,6 +77,7 @@ class ScheduleViewModel extends ChangeNotifier {
       }
     }
     debugPrint("time in vm: $_pickedDate, schedule: ${schedules.length}");
+    return 0;
   }
 
   ScheduleModel? getSchedule() {
@@ -81,9 +104,15 @@ class ScheduleViewModel extends ChangeNotifier {
     }
   }
 
-  void editMiniSchedule(int index, MiniScheduleModel newMiniSchedule) {
+  int editMiniSchedule(int index, MiniScheduleModel newMiniSchedule) {
+    if (getTotalWaterAmount() + newMiniSchedule.waterAmount > maxWaterAmount) {
+      debugPrint('Przekroczono maksymalną ilość wody');
+      return -1;
+    }
     getSchedule()?.miniSchedules[index] = newMiniSchedule;
+
     notifyListeners();
+    return 0;
   }
 
   void addNewMiniSchedule(

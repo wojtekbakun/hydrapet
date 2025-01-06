@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hydrapet/view/screens/settings_screen.dart';
 import 'package:hydrapet/view/screens/single_day_screen.dart';
 import 'package:hydrapet/view_model/schedule_view_model.dart';
 import 'package:provider/provider.dart';
@@ -75,6 +76,26 @@ class _HomeScreenState extends State<HomeScreen> {
                 } else {
                   debugPrint('Nie wybrano daty');
                 }
+              },
+            ),
+            ListTile(
+              title: const Row(
+                children: [
+                  //Status icon
+                  Padding(
+                    padding: EdgeInsets.only(right: 8.0),
+                    child: Icon(Icons.settings),
+                  ),
+                  Text('Ustawienia'),
+                ],
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SettingsScreen(),
+                  ),
+                );
               },
             ),
           ],
