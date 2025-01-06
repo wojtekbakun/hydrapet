@@ -22,7 +22,8 @@ class _ZapiszDaneState extends State<ZapiszDane> {
   @override
   Widget build(BuildContext context) {
     return TextButton(
-      onPressed: () => viewModel.saveScheduleToLocalStorage(),
+      onPressed: () {},
+      //onPressed: () => viewModel.saveScheduleToLocalStorage(),
       child: const Row(
         children: [
           Icon(Icons.add),

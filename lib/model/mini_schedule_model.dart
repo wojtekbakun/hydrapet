@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class MiniScheduleModel {
   TimeOfDay time;
-  double waterAmount;
+  int waterAmount;
 
   MiniScheduleModel({
     required this.time,
@@ -25,7 +25,7 @@ class MiniScheduleModel {
         hour: int.parse(timeParts[0]),
         minute: int.parse(timeParts[1]),
       ),
-      waterAmount: json['waterAmount'] as double,
+      waterAmount: json['waterAmount'] as int,
     );
   }
 }

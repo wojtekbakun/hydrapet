@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hydrapet/model/mini_schedule_model.dart';
 import 'package:hydrapet/view/components/time_for_water_refilling.dart';
+import 'package:hydrapet/view/components/water_schedule_dialog.dart';
 import 'package:hydrapet/view_model/schedule_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -14,37 +15,6 @@ class SingleDayScreen extends StatefulWidget {
 }
 
 class _SingleDayScreenState extends State<SingleDayScreen> {
-  // !TODO - refactor to use provider
-
-  Future<dynamic> chooseDate(
-      BuildContext context, ScheduleViewModel viewModel) async {
-    TimeOfDay? pickedTimeOfDay =
-        await showTimePicker(context: context, initialTime: TimeOfDay.now());
-
-    if (widget.pickedDate != null) {
-      if (pickedTimeOfDay != null) {
-        setState(() {
-          final newDateTime = DateTime(
-            widget.pickedDate!.year,
-            widget.pickedDate!.month,
-            widget.pickedDate!.day,
-            pickedTimeOfDay.hour,
-            pickedTimeOfDay.minute,
-          );
-          viewModel.addNewWateringTime(newDateTime,
-              MiniScheduleModel(time: pickedTimeOfDay, waterAmount: 122));
-          debugPrint('wybrana data: $newDateTime');
-        });
-      } else {
-        debugPrint('Nie wybrano godziny');
-        return;
-      }
-    } else {
-      debugPrint('Nie wybrano daty');
-      return;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,13 +42,17 @@ class _SingleDayScreenState extends State<SingleDayScreen> {
                           style: Theme.of(context).textTheme.headlineSmall,
                         ),
                         Text(
-                          'Wykorzystano 350/1000ml',
+                          'Wykorzystano ${viewModel.getTotalWaterAmount()}/1000ml',
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                       ],
                     ),
                     IconButton(
-                      onPressed: () => chooseDate(context, viewModel),
+                      onPressed: () => WaterScheduleDialog(
+                              context: context,
+                              initialTime: TimeOfDay.now(),
+                              initialWaterAmount: 0)
+                          .show(),
                       icon: const Icon(Icons.add),
                     ),
                   ],
@@ -87,36 +61,15 @@ class _SingleDayScreenState extends State<SingleDayScreen> {
                 Expanded(
                   child: ListView.builder(
                     shrinkWrap: true,
-                    itemCount: viewModel.schedule.miniSchedule.length,
+                    itemCount: viewModel.getMiniSchedules().length,
                     itemBuilder: (BuildContext context, int index) {
                       return TimeForWaterRefilling(
-                          viewModel: viewModel, index: index);
+                        viewModel: viewModel,
+                        index: index,
+                      );
                     },
                   ),
                 ),
-
-                // Padding(
-                //   padding: const EdgeInsets.symmetric(vertical: 24.0),
-                //   child: PoraDnia(
-                //     viewModel: viewModel,
-                //   ),
-                // ),
-                // Text(
-                //   'Ilość wody',
-                //   style: Theme.of(context).textTheme.headlineSmall,
-                // ),
-                // Padding(
-                //   padding: const EdgeInsets.symmetric(vertical: 24.0),
-                //   child: IloscWody(viewModel: viewModel),
-                // ),
-                // const Row(
-                //   mainAxisSize: MainAxisSize.min,
-                //   mainAxisAlignment: MainAxisAlignment.center,
-                //   crossAxisAlignment: CrossAxisAlignment.center,
-                //   children: [
-                //     ZapiszDane(),
-                //   ],
-                // ),
               ],
             ),
           ),

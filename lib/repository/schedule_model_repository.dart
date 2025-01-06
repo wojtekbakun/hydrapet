@@ -22,14 +22,6 @@ class ScheduleRepository {
     return null;
   }
 
-  void addNewMiniSchedule(
-      ScheduleModel schedule, MiniScheduleModel newMiniSchedule) {
-    debugPrint('aktualne miniSchedule: ${schedule.miniSchedule}');
-    debugPrint('ilosc miniSchedule: ${schedule.miniSchedule.length}');
-    schedule.miniSchedule.add(newMiniSchedule);
-    debugPrint('Dodano nowy miniSchedule: ${schedule.miniSchedule}');
-  }
-
   // void changeTime(
   //     ScheduleModel schedule, PartOfTheDay partOfTheDay, TimeOfDay newTime) {
   //   switch (partOfTheDay) {

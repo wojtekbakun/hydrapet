@@ -40,7 +40,7 @@ class _PoraDniaState extends State<PoraDnia> {
             pickedTimeOfDay.hour,
             pickedTimeOfDay.minute,
           );
-          widget.viewModel.addNewWateringTime(newDateTime,
+          widget.viewModel.addNewSchedule(
               MiniScheduleModel(time: pickedTimeOfDay, waterAmount: 122));
           debugPrint('wybrana data: $newDateTime');
         });
@@ -68,7 +68,7 @@ class _PoraDniaState extends State<PoraDnia> {
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: widget.viewModel.getSchedule().miniSchedule.length,
+              itemCount: widget.viewModel.getMiniSchedules().length,
               scrollDirection: Axis.horizontal,
               itemBuilder: (BuildContext context, int index) {
                 return TimeForWaterRefilling(
