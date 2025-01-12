@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:hydrapet/model/mini_schedule_model.dart';
 import 'package:hydrapet/model/schedule_model.dart';
 import 'package:hydrapet/repository/schedule_model_repository.dart';
+import 'dart:io';
+import 'package:mqtt_client/mqtt_client.dart';
+import 'package:mqtt_client/mqtt_server_client.dart';
 
 class ScheduleViewModel extends ChangeNotifier {
+  MqttServerClient? mqttClient;
+
   final List<ScheduleModel> _schedules = [];
   List<ScheduleModel> get schedules => _schedules;
 
@@ -19,9 +24,16 @@ class ScheduleViewModel extends ChangeNotifier {
   int _oneTimeWaterAmount = 50;
   int get oneTimeWaterAmount => _oneTimeWaterAmount;
 
+  int _currentWaterAmount = 0;
+  int get currentWaterAmount => _currentWaterAmount;
+
+  int _batteryLevel = 0;
+  int get batteryLevel => _batteryLevel;
+
   ScheduleRepository repository;
   ScheduleViewModel({required this.repository}) {
     initScheduleViewModel();
+    connectAndListenToMqtt();
     // loadScheduleFromLocalStorage();
   }
 
@@ -52,6 +64,37 @@ class ScheduleViewModel extends ChangeNotifier {
 
   void initScheduleViewModel() {
     _schedules.add(_defaultSchedule);
+  }
+
+  void setBatteryLevel(int newBatteryLevel) {
+    _batteryLevel = newBatteryLevel;
+    notifyListeners();
+  }
+
+  int getBatteryLevel() {
+    return _batteryLevel;
+  }
+
+  void setCurrentWaterAmount(int newWaterAmount) {
+    _currentWaterAmount = newWaterAmount;
+    notifyListeners();
+  }
+
+  int getCurrentWaterAmount() {
+    return _currentWaterAmount;
+  }
+
+  double getWaterPercentage() {
+    return _currentWaterAmount / maxWaterAmount * 100;
+  }
+
+  void setOneTimeWaterAmount(int newWaterAmount) {
+    _oneTimeWaterAmount = newWaterAmount;
+    notifyListeners();
+  }
+
+  int getOneTimeWaterAmount() {
+    return _oneTimeWaterAmount;
   }
 
   void setDefaultWaterAmount(int newWaterAmount) {
@@ -186,21 +229,84 @@ class ScheduleViewModel extends ChangeNotifier {
     return hoursAndMinutes;
   }
 
-  // Future<void> loadScheduleFromLocalStorage() async {
-  //   try {
-  //     final newSchedule = await repository.loadScheduleModel();
-  //     if (newSchedule != null) {
-  //       setNewSchedule(newSchedule);
-  //     }
-  //     // debugPrint(
-  //     //     'Wczytano dane z lokalnej bazy danych: ${schedule.wateringTimes}');
-  //   } catch (e) {
-  //     debugPrint('[vm] Błąd przy pobieraniu z repo: $e');
-  //   }
-  // }
+  Future<void> connectAndListenToMqtt() async {
+    // Adres i port brokera – dostosuj do swojego środowiska,
+    // np. HiveMQ Cloud: adres, port 8883 (TLS) itp.
+    final mqttClient = MqttServerClient.withPort(
+      '8760b9bf0e454252820e44deb9a27fd0.s1.eu.hivemq.cloud',
+      'flutter_client',
+      8883,
+    );
 
-  // void saveScheduleToLocalStorage() {
-  //   repository.saveScheduleToLocalStorage(_schedule);
-  //   debugPrint("Zapisano dane do pamięci lokalnej");
-  // }
+    // Włączamy szyfrowanie TLS
+    mqttClient.secure = true;
+    mqttClient.securityContext = SecurityContext.defaultContext;
+    mqttClient.logging(on: true);
+    mqttClient.keepAlivePeriod = 20;
+    mqttClient.setProtocolV311();
+
+    // Ustaw dane logowania (jeśli broker wymaga):
+    // Konfiguracja wiadomości łączącej (z uwierzytelnieniem)
+    final connMessage = MqttConnectMessage()
+        .authenticateAs(
+            'moj_uzytkownik', 'moj_uzytkownik1A') // Uzupełnij danymi
+        .withClientIdentifier('flutter_client')
+        .startClean()
+        .withWillTopic('will_topic')
+        .withWillMessage('Klient rozłączony')
+        .withWillQos(MqttQos.atLeastOnce);
+    mqttClient.connectionMessage = connMessage;
+
+    // Obsługa rozłączenia:
+    mqttClient.onDisconnected = () {
+      debugPrint('[MQTT] Rozłączono');
+    };
+
+    try {
+      debugPrint('[MQTT] Łączenie...');
+      await mqttClient.connect();
+      debugPrint('[MQTT] Połączono!');
+    } catch (e) {
+      debugPrint('[MQTT] Błąd połączenia: $e');
+      mqttClient.disconnect();
+      return;
+    }
+
+    // Subskrypcja tematu "water"
+    const waterTopic = 'water';
+    mqttClient.subscribe(waterTopic, MqttQos.atMostOnce);
+
+    const batteryTopic = 'battery';
+    mqttClient.subscribe(batteryTopic, MqttQos.atMostOnce);
+
+    // Nasłuchiwanie wiadomości
+    mqttClient.updates?.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
+      final recMessage = c?[0].payload as MqttPublishMessage;
+      final payload = MqttPublishPayload.bytesToStringAsString(
+        recMessage.payload.message,
+      );
+
+      debugPrint('[MQTT] Otrzymano: $payload z tematu: ${c?[0].topic}');
+
+      // Spróbuj zrzutować payload na liczbę wody i zapisać w Schedule
+      if (c?[0].topic == batteryTopic) {
+        final parsedBattery = int.tryParse(payload);
+        if (parsedBattery != null) {
+          // Dodaj nowy wpis do bieżącego harmonogramu (lub jak wolisz przechowywać)
+          setBatteryLevel(parsedBattery);
+          notifyListeners();
+        } else {
+          debugPrint('[MQTT] Nie udało się przetworzyć liczby wody.');
+        }
+      }
+      final parsedWater = int.tryParse(payload);
+      if (parsedWater != null) {
+        // Dodaj nowy wpis do bieżącego harmonogramu (lub jak wolisz przechowywać)
+        setCurrentWaterAmount(parsedWater);
+        notifyListeners();
+      } else {
+        debugPrint('[MQTT] Nie udało się przetworzyć liczby wody.');
+      }
+    });
+  }
 }

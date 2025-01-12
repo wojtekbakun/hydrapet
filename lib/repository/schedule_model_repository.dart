@@ -23,26 +23,4 @@ class ScheduleRepository {
     }
     return null;
   }
-
-  // // save default schedule to server via mqtt
-  // void saveDefaultScheduleToServer() {
-  //   publishMessage(mqtt, 'schedule',
-  //       jsonEncode(ScheduleModel.getDefaultSchedule().toJson()));
-  // }
-
-  // // save schedule to server via mqtt
-  // void saveScheduleToServer(ScheduleModel schedule) {
-  //   mqtt.publish('schedule', jsonEncode(schedule.toJson()));
-  // }
-
-  // // load schedule from server via mqtt
-  // Future<ScheduleModel?> loadScheduleFromServer() async {
-  //   mqtt.subscribe('schedule');
-  //   mqtt.onMessage((topic, message) {
-  //     if (topic == 'schedule') {
-  //       return ScheduleModel.fromJson(jsonDecode(message));
-  //     }
-  //   });
-  //   return null;
-  // }
 }

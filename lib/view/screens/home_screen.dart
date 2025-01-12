@@ -18,7 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
-    connectToBroker();
+    //connectToBroker();
     super.initState();
   }
 
@@ -144,9 +144,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const Text(
-                            '55%',
-                            style: TextStyle(
+                          Text(
+                            '${viewModel.getWaterPercentage()}%',
+                            style: const TextStyle(
                               fontSize: 50,
                             ),
                           ),
@@ -192,11 +192,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       'bateria',
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
-                    const Expanded(
+                    Expanded(
                       child: Center(
                         child: Text(
-                          '99%',
-                          style: TextStyle(
+                          '${viewModel.getBatteryLevel()}%',
+                          style: const TextStyle(
                             fontSize: 50,
                           ),
                         ),
