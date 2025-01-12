@@ -4,21 +4,54 @@ import 'package:hydrapet/model/schedule_model.dart';
 import 'package:hydrapet/repository/schedule_model_repository.dart';
 
 class ScheduleViewModel extends ChangeNotifier {
-  List<ScheduleModel> _schedules = [];
+  final List<ScheduleModel> _schedules = [];
   List<ScheduleModel> get schedules => _schedules;
 
-  DateTime _pickedDate = DateTime.now();
-  DateTime get pickedDate => _pickedDate;
+  DateTime? _pickedDate = DateTime.now();
+  DateTime? get pickedDate => _pickedDate;
 
-  int _defaultWaterAmount = 0;
+  int _defaultWaterAmount = 200;
   int get defaultWaterAmount => _defaultWaterAmount;
 
   int _maxWaterAmount = 1000;
   int get maxWaterAmount => _maxWaterAmount;
 
+  int _oneTimeWaterAmount = 50;
+  int get oneTimeWaterAmount => _oneTimeWaterAmount;
+
   ScheduleRepository repository;
   ScheduleViewModel({required this.repository}) {
+    initScheduleViewModel();
     // loadScheduleFromLocalStorage();
+  }
+
+  final ScheduleModel _defaultSchedule = ScheduleModel(
+    isDefault: true,
+    date: null,
+    miniSchedule: [
+      MiniScheduleModel(
+        time: const TimeOfDay(hour: 8, minute: 0),
+        waterAmount: 200,
+      ),
+      MiniScheduleModel(
+        time: const TimeOfDay(hour: 12, minute: 0),
+        waterAmount: 200,
+      ),
+      MiniScheduleModel(
+        time: const TimeOfDay(hour: 16, minute: 0),
+        waterAmount: 200,
+      ),
+      MiniScheduleModel(
+        time: const TimeOfDay(hour: 20, minute: 0),
+        waterAmount: 200,
+      ),
+    ],
+  );
+
+  ScheduleModel get defaultSchedule => _defaultSchedule;
+
+  void initScheduleViewModel() {
+    _schedules.add(_defaultSchedule);
   }
 
   void setDefaultWaterAmount(int newWaterAmount) {
@@ -44,15 +77,13 @@ class ScheduleViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setPickedDate(DateTime date) {
+  void setPickedDate(DateTime? date) {
     _pickedDate = date;
     debugPrint('Wybrana data: $date');
     notifyListeners();
   }
 
   int addNewSchedule(MiniScheduleModel newMiniSchedule) {
-    // check if date already exists, if yes then add mini schedule to it else add new schedule to days schedule
-    // ! check if totalWaterAmount is not greater than maxWaterAmount
     if (getTotalWaterAmount() + newMiniSchedule.waterAmount > maxWaterAmount) {
       debugPrint('Przekroczono maksymalną ilość wody');
       return -1;
@@ -63,16 +94,19 @@ class ScheduleViewModel extends ChangeNotifier {
       addNewMiniSchedule(_schedules[0], newMiniSchedule);
       return 0;
     }
-    for (var i = 0; i < schedules.length;) {
+    for (var i = 0; i < _schedules.length;) {
       if (_schedules[i].date == _pickedDate) {
+        debugPrint('Znaleziono datę: $_pickedDate, dodano nowy miniSchedule');
         addNewMiniSchedule(_schedules[i], newMiniSchedule);
-        break;
+        return 0;
       } else {
         i++;
         if (i == schedules.length) {
-          _schedules.add(ScheduleModel(date: _pickedDate, miniSchedule: []));
+          debugPrint('Nie znaleziono daty: $_pickedDate, dodano nową');
+          _schedules.add(ScheduleModel(
+              date: _pickedDate, miniSchedule: [newMiniSchedule]));
           addNewMiniSchedule(_schedules[i], newMiniSchedule);
-          break;
+          return 0;
         }
       }
     }
@@ -81,6 +115,9 @@ class ScheduleViewModel extends ChangeNotifier {
   }
 
   ScheduleModel? getSchedule() {
+    if (_pickedDate == null) {
+      return _defaultSchedule;
+    }
     for (var i = 0; i < _schedules.length; i++) {
       if (_schedules[i].date == _pickedDate) {
         debugPrint('Znaleziono date: ${_schedules[i].date}');
@@ -105,7 +142,10 @@ class ScheduleViewModel extends ChangeNotifier {
   }
 
   int editMiniSchedule(int index, MiniScheduleModel newMiniSchedule) {
-    if (getTotalWaterAmount() + newMiniSchedule.waterAmount > maxWaterAmount) {
+    if (getTotalWaterAmount() -
+            getSchedule()!.miniSchedules[index].waterAmount +
+            newMiniSchedule.waterAmount >
+        maxWaterAmount) {
       debugPrint('Przekroczono maksymalną ilość wody');
       return -1;
     }
@@ -115,10 +155,35 @@ class ScheduleViewModel extends ChangeNotifier {
     return 0;
   }
 
+  int doOneTimeWatering() {
+    if (getTotalWaterAmount() + oneTimeWaterAmount > maxWaterAmount) {
+      debugPrint('Przekroczono maksymalną ilość wody');
+      return -1;
+    }
+    addNewMiniSchedule(
+        getSchedule()!,
+        MiniScheduleModel(
+          time: TimeOfDay.now(),
+          waterAmount: _oneTimeWaterAmount,
+        ));
+    return 0;
+  }
+
   void addNewMiniSchedule(
       ScheduleModel schedule, MiniScheduleModel newMiniSchedule) {
     schedule.miniSchedules.add(newMiniSchedule);
     notifyListeners();
+  }
+
+  String getHoursAndMinutesOfMiniSchedules() {
+    _pickedDate = null;
+    String hoursAndMinutes = '';
+    getMiniSchedules().forEach((element) {
+      // display hours and minutes in format: 'hh:mm ' with 0 in front of single digit numbers
+      hoursAndMinutes +=
+          '${element.time.hour.toString().padLeft(2, '0')}:${element.time.minute.toString().padLeft(2, '0')} ';
+    });
+    return hoursAndMinutes;
   }
 
   // Future<void> loadScheduleFromLocalStorage() async {

@@ -1,8 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:hydrapet/model/mini_schedule_model.dart';
+import 'package:hydrapet/model/mqtt_server_client.dart';
 import 'package:hydrapet/model/schedule_model.dart';
+import 'package:hydrapet/repository/my_mqtt_client.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:mqtt_client/mqtt_client.dart';
+import 'package:mqtt_client/mqtt_server_client.dart';
 
 class ScheduleRepository {
   Future<void> saveScheduleToLocalStorage(ScheduleModel schedule) async {
@@ -22,18 +24,25 @@ class ScheduleRepository {
     return null;
   }
 
-  // void changeTime(
-  //     ScheduleModel schedule, PartOfTheDay partOfTheDay, TimeOfDay newTime) {
-  //   switch (partOfTheDay) {
-  //     case PartOfTheDay.morning:
-  //       changeMorningTime(schedule, newTime);
-  //       break;
-  //     case PartOfTheDay.afternoon:
-  //       changeAfternoonTime(schedule, newTime);
-  //       break;
-  //     case PartOfTheDay.evening:
-  //       changeEveningTime(schedule, newTime);
-  //       break;
-  //   }
-  // }
+  // save default schedule to server via mqtt
+  void saveDefaultScheduleToServer() {
+    publishMessage(mqtt, 'schedule',
+        jsonEncode(ScheduleModel.getDefaultSchedule().toJson()));
+  }
+
+  // save schedule to server via mqtt
+  void saveScheduleToServer(ScheduleModel schedule) {
+    mqtt.publish('schedule', jsonEncode(schedule.toJson()));
+  }
+
+  // load schedule from server via mqtt
+  Future<ScheduleModel?> loadScheduleFromServer() async {
+    mqtt.subscribe('schedule');
+    mqtt.onMessage((topic, message) {
+      if (topic == 'schedule') {
+        return ScheduleModel.fromJson(jsonDecode(message));
+      }
+    });
+    return null;
+  }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hydrapet/repository/my_mqtt_client.dart';
 import 'package:hydrapet/view/screens/settings_screen.dart';
 import 'package:hydrapet/view/screens/single_day_screen.dart';
 import 'package:hydrapet/view_model/schedule_view_model.dart';
@@ -16,8 +17,13 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context, firstDate: DateTime.now(), lastDate: DateTime(2030));
 
   @override
+  void initState() {
+    connectToBroker();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    //mqtt.main();
     final viewModel = Provider.of<ScheduleViewModel>(context);
     return Scaffold(
       drawer: Drawer(
@@ -132,14 +138,44 @@ class _HomeScreenState extends State<HomeScreen> {
                       'woda',
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
-                    const Expanded(
-                      child: Center(
-                        child: Text(
-                          '50%',
-                          style: TextStyle(
-                            fontSize: 50,
+                    Expanded(
+                      // add button to make single water refill and show current water amount
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Text(
+                            '55%',
+                            style: TextStyle(
+                              fontSize: 50,
+                            ),
                           ),
-                        ),
+                          ElevatedButton(
+                            onPressed: () {
+                              debugPrint(
+                                  'pcked date ${viewModel.pickedDate.toString()}');
+                              int retVal = viewModel.doOneTimeWatering();
+
+                              retVal == -1
+                                  ? ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Nie mozna dolać więcej wody, limit został wyczerpany.',
+                                        ),
+                                      ),
+                                    )
+                                  //show snackbar
+                                  : ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Dolano wody',
+                                        ),
+                                      ),
+                                    );
+                            },
+                            child: const Text('Napełnij'),
+                          ),
+                        ],
                       ),
                     ),
                   ],

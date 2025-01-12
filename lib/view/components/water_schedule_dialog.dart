@@ -8,7 +8,7 @@ class WaterScheduleDialog {
   final TimeOfDay initialTime;
   final int initialWaterAmount;
   final bool isEdit;
-  final int index;
+  final int? index;
 
   WaterScheduleDialog({
     required this.context,
@@ -69,7 +69,7 @@ class WaterScheduleDialog {
                       int.tryParse(waterAmountController.text) ?? 0;
                   int retVal = isEdit
                       ? viewModel.editMiniSchedule(
-                          index,
+                          index ?? 0,
                           MiniScheduleModel(
                               time: pickedTimeOfDay, waterAmount: waterAmount),
                         )

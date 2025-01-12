@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hydrapet/model/mini_schedule_model.dart';
 import 'package:hydrapet/view/components/time_for_water_refilling.dart';
 import 'package:hydrapet/view/components/water_schedule_dialog.dart';
 import 'package:hydrapet/view_model/schedule_view_model.dart';
@@ -8,7 +7,10 @@ import 'package:intl/intl.dart';
 
 class SingleDayScreen extends StatefulWidget {
   final DateTime? pickedDate;
-  const SingleDayScreen({super.key, required this.pickedDate});
+  const SingleDayScreen({
+    super.key,
+    this.pickedDate,
+  });
 
   @override
   State<SingleDayScreen> createState() => _SingleDayScreenState();
@@ -38,7 +40,9 @@ class _SingleDayScreenState extends State<SingleDayScreen> {
                     Column(
                       children: [
                         Text(
-                          '${widget.pickedDate!.day} ${DateFormat.MMMM().format(widget.pickedDate!)}',
+                          widget.pickedDate == null
+                              ? 'Domyślny harmonogram'
+                              : '${widget.pickedDate!.day} ${DateFormat.MMMM().format(widget.pickedDate!)}',
                           style: Theme.of(context).textTheme.headlineSmall,
                         ),
                         Text(

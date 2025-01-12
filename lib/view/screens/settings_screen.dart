@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hydrapet/view/screens/single_day_screen.dart';
 import 'package:hydrapet/view_model/schedule_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -106,11 +107,19 @@ class SettingsScreen extends StatelessWidget {
           // create default schedule
           ListTile(
             title: const Text('Domyślny harmonogram'),
-            subtitle: const Text('13.00, 14.00, 15.00'),
+            subtitle: Text(viewModel.getHoursAndMinutesOfMiniSchedules()),
             trailing: IconButton(
-              icon: const Icon(Icons.add),
+              icon: const Icon(Icons.edit),
               onPressed: () {
                 // viewModel.createDefaultSchedule();
+                viewModel.setPickedDate(null);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const SingleDayScreen(
+                            pickedDate: null,
+                          )),
+                );
               },
             ),
           ),
