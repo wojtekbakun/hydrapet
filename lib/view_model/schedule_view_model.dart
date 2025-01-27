@@ -1,13 +1,27 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:hydrapet/model/device.dart';
 import 'package:hydrapet/model/mini_schedule_model.dart';
 import 'package:hydrapet/model/schedule_model.dart';
+import 'package:hydrapet/repository/device_repository.dart';
 import 'package:hydrapet/repository/schedule_model_repository.dart';
 import 'dart:io';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
+import 'package:http/http.dart' as http;
 
 class ScheduleViewModel extends ChangeNotifier {
+  final String apiUrl = 'http://0.0.0.0:3000'; // Adres API
   MqttServerClient? mqttClient;
+  String? _jwtToken;
+  String? get jwtToken => _jwtToken;
+
+  final DeviceRepository deviceRepository;
+  String? _selectedDeviceId;
+  List<Device> _devices = [];
+  String? get selectedDeviceId => _selectedDeviceId;
+  List<Device> get devices => _devices;
 
   final List<ScheduleModel> _schedules = [];
   List<ScheduleModel> get schedules => _schedules;
@@ -31,9 +45,9 @@ class ScheduleViewModel extends ChangeNotifier {
   int get batteryLevel => _batteryLevel;
 
   ScheduleRepository repository;
-  ScheduleViewModel({required this.repository}) {
+  ScheduleViewModel(
+      {required this.repository, required this.deviceRepository}) {
     initScheduleViewModel();
-    connectAndListenToMqtt();
   }
 
   final ScheduleModel _defaultSchedule = ScheduleModel(
@@ -61,8 +75,72 @@ class ScheduleViewModel extends ChangeNotifier {
 
   ScheduleModel get defaultSchedule => _defaultSchedule;
 
-  void initScheduleViewModel() {
+  Future<void> initScheduleViewModel() async {
+    _jwtToken = await repository.loadJwtToken();
     _schedules.add(_defaultSchedule);
+  }
+
+  Future<void> saveJwtToken(String token) async {
+    _jwtToken = token;
+    await repository.saveJwtToken(token);
+    notifyListeners();
+  }
+
+  Future<void> removeJwtToken() async {
+    _jwtToken = null;
+    await repository.removeJwtToken();
+    notifyListeners();
+  }
+
+  Future<void> refreshToken() async {
+    // Tutaj można zaimplementować mechanizm odświeżania tokenu, jeśli dostępny
+    // Na przykład wysłanie żądania do serwera po nowy token
+    debugPrint('Odświeżanie tokenu JWT...');
+  }
+
+  bool isAuthenticated() {
+    debugPrint('Czy użytkownik jest zalogowany? $_jwtToken');
+    return _jwtToken != null && _jwtToken!.isNotEmpty;
+  }
+
+  Future<void> performAuthenticatedAction(
+      Future<void> Function(String token) action) async {
+    if (_jwtToken == null) {
+      throw Exception('Nie zalogowano użytkownika');
+    }
+    await action(_jwtToken!);
+  }
+
+  // Przykład użycia tokenu w metodzie ViewModel
+  Future<void> exampleApiCall() async {
+    if (!isAuthenticated()) {
+      throw Exception('Brak autoryzacji');
+    }
+
+    // Wykonaj żądanie z wykorzystaniem tokenu
+    debugPrint('Token JWT: $_jwtToken');
+    // Dodaj tutaj logikę, np. wywołanie metody z repozytorium
+  }
+
+  // Metoda do pobierania harmonogramu z autoryzacją
+  Future<void> fetchScheduleData() async {
+    await performAuthenticatedAction((token) async {
+      // Przykład wywołania z tokenem
+      debugPrint('Pobieranie danych harmonogramu z tokenem: $token');
+      // Wywołanie odpowiedniej metody z repozytorium
+    });
+  }
+
+  // Inicjalizacja tokenu podczas tworzenia ViewModel
+  Future<void> authenticate(String token) async {
+    await saveJwtToken(token);
+    debugPrint('Zapisano token JWT: $token');
+  }
+
+  // Wylogowanie użytkownika
+  Future<void> logout() async {
+    await removeJwtToken();
+    debugPrint('Wylogowano użytkownika');
   }
 
   void setBatteryLevel(int newBatteryLevel) {
@@ -228,84 +306,110 @@ class ScheduleViewModel extends ChangeNotifier {
     return hoursAndMinutes;
   }
 
-  Future<void> connectAndListenToMqtt() async {
-    // Adres i port brokera – dostosuj do swojego środowiska,
-    // np. HiveMQ Cloud: adres, port 8883 (TLS) itp.
-    final mqttClient = MqttServerClient.withPort(
-      '8760b9bf0e454252820e44deb9a27fd0.s1.eu.hivemq.cloud',
-      'flutter_client',
-      8883,
-    );
+  bool _devicesLoaded = false;
 
-    // Włączamy szyfrowanie TLS
-    mqttClient.secure = true;
-    mqttClient.securityContext = SecurityContext.defaultContext;
-    mqttClient.logging(on: true);
-    mqttClient.keepAlivePeriod = 20;
-    mqttClient.setProtocolV311();
+  Future<void> fetchDevices() async {
+    if (_devicesLoaded) return; // Unikaj wielokrotnego wywoływania
+    _devicesLoaded = true;
 
-    // Ustaw dane logowania (jeśli broker wymaga):
-    // Konfiguracja wiadomości łączącej (z uwierzytelnieniem)
-    final connMessage = MqttConnectMessage()
-        .authenticateAs(
-            'moj_uzytkownik', 'moj_uzytkownik1A') // Uzupełnij danymi
-        .withClientIdentifier('flutter_client')
-        .startClean()
-        .withWillTopic('will_topic')
-        .withWillMessage('Klient rozłączony')
-        .withWillQos(MqttQos.atLeastOnce);
-    mqttClient.connectionMessage = connMessage;
-
-    // Obsługa rozłączenia:
-    mqttClient.onDisconnected = () {
-      debugPrint('[MQTT] Rozłączono');
-    };
-
-    try {
-      debugPrint('[MQTT] Łączenie...');
-      await mqttClient.connect();
-      debugPrint('[MQTT] Połączono!');
-    } catch (e) {
-      debugPrint('[MQTT] Błąd połączenia: $e');
-      mqttClient.disconnect();
-      return;
+    if (_jwtToken == null) {
+      debugPrint('JWT token is null, cannot fetch devices');
+      throw Exception('JWT token is not available');
     }
 
-    // Subskrypcja tematu "water"
-    const waterTopic = 'water';
-    mqttClient.subscribe(waterTopic, MqttQos.atMostOnce);
-
-    const batteryTopic = 'battery';
-    mqttClient.subscribe(batteryTopic, MqttQos.atMostOnce);
-
-    // Nasłuchiwanie wiadomości
-    mqttClient.updates?.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
-      final recMessage = c?[0].payload as MqttPublishMessage;
-      final payload = MqttPublishPayload.bytesToStringAsString(
-        recMessage.payload.message,
-      );
-
-      debugPrint('[MQTT] Otrzymano: $payload z tematu: ${c?[0].topic}');
-
-      // Spróbuj zrzutować payload na liczbę wody i zapisać w Schedule
-      if (c?[0].topic == batteryTopic) {
-        final parsedBattery = int.tryParse(payload);
-        if (parsedBattery != null) {
-          // Dodaj nowy wpis do bieżącego harmonogramu (lub jak wolisz przechowywać)
-          setBatteryLevel(parsedBattery);
-          notifyListeners();
-        } else {
-          debugPrint('[MQTT] Nie udało się przetworzyć liczby wody.');
-        }
+    try {
+      debugPrint('Fetching devices...');
+      _devices = await deviceRepository.getDevices(_jwtToken!);
+      debugPrint('Devices fetched: $_devices');
+      if (_devices.isNotEmpty && _selectedDeviceId == null) {
+        _selectedDeviceId =
+            '${_devices.first.deviceId}'; // Ustaw domyślne urządzenie
+        debugPrint('Default device selected: $_selectedDeviceId');
       }
-      final parsedWater = int.tryParse(payload);
-      if (parsedWater != null) {
-        // Dodaj nowy wpis do bieżącego harmonogramu (lub jak wolisz przechowywać)
-        setCurrentWaterAmount(parsedWater);
-        notifyListeners();
-      } else {
-        debugPrint('[MQTT] Nie udało się przetworzyć liczby wody.');
-      }
-    });
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error fetching devices: $e');
+      rethrow;
+    }
+  }
+
+  void selectDevice(String deviceId) {
+    _selectedDeviceId = deviceId;
+    notifyListeners();
+  }
+
+  Future<String> resetTare(int deviceId) async {
+    final url = Uri.parse('$apiUrl/devices/$deviceId/set-tare');
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer $_jwtToken', // Zamień na właściwy token
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return response.body;
+    } else {
+      throw Exception('Reset tary nie powiódł się');
+    }
+  }
+
+  Future<String> deleteAlarm(int deviceId, String timestamp) async {
+    final url = Uri.parse('$apiUrl/devices/$deviceId/delete-alarm');
+    final response = await http.delete(
+      url,
+      headers: {
+        'Authorization': 'Bearer $_jwtToken', // Zamień na właściwy token
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'timestamp': timestamp,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return data['message'];
+    } else {
+      throw Exception('Usuwanie alarmu nie powiodło się');
+    }
+  }
+
+  Future<String> getDeviceTime(int deviceId) async {
+    final url = Uri.parse('$apiUrl/devices/$deviceId/get-time');
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $_jwtToken', // Zamień na właściwy token
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return response.body;
+    } else {
+      throw Exception('Pobranie czasu urządzenia nie powiodło się');
+    }
+  }
+
+  Future<String> setDeviceTime(int deviceId, String timestamp) async {
+    final url = Uri.parse('$apiUrl/devices/$deviceId/set-time');
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer $_jwtToken', // Zamień na właściwy token
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'timestamp': timestamp,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return response.body;
+    } else {
+      throw Exception('Ustawienie czasu urządzenia nie powiodło się');
+    }
   }
 }

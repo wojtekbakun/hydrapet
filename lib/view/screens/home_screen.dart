@@ -116,7 +116,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text('Wyloguj'),
                 ],
               ),
-              onTap: () {
+              onTap: () async {
+                await viewModel.logout();
+
                 Navigator.pushReplacementNamed(
                     context, '/login'); // Przejście do logowania
               },

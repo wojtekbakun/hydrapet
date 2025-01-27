@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:hydrapet/view_model/schedule_view_model.dart';
+import 'package:provider/provider.dart';
+
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -15,6 +18,8 @@ class _LoginPageState extends State<LoginPage> {
   String? _errorMessage;
 
   Future<void> login() async {
+    final viewModel = Provider.of<ScheduleViewModel>(context, listen: false);
+
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -38,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
         final token = data['token']; // Otrzymany token JWT
         // Przechowaj token w pamięci lub użyj, np. w SharedPreferences
         print("Logged in! Token: $token");
-
+        await viewModel.authenticate(token);
         // Przekierowanie na inną stronę
         Navigator.pushReplacementNamed(context, '/');
       } else {
@@ -67,15 +72,15 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
+              const Text(
                 'Login',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Email',
                   border: OutlineInputBorder(),
                 ),
@@ -89,11 +94,11 @@ class _LoginPageState extends State<LoginPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _passwordController,
                 obscureText: true,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Password',
                   border: OutlineInputBorder(),
                 ),
@@ -107,26 +112,26 @@ class _LoginPageState extends State<LoginPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               if (_errorMessage != null)
                 Text(
                   _errorMessage!,
-                  style: TextStyle(color: Colors.red),
+                  style: const TextStyle(color: Colors.red),
                 ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _isLoading ? null : login,
                 child: _isLoading
-                    ? CircularProgressIndicator(color: Colors.white)
-                    : Text('Login'),
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text('Login'),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               TextButton(
                 onPressed: () {
                   Navigator.pushNamed(
                       context, '/register'); // Przejście do rejestracji
                 },
-                child: Text('Don\'t have an account? Register here'),
+                child: const Text('Don\'t have an account? Register here'),
               ),
             ],
           ),
