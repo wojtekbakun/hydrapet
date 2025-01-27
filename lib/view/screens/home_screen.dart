@@ -104,6 +104,23 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
             ),
+            //logout
+            ListTile(
+              title: const Row(
+                children: [
+                  //Status icon
+                  Padding(
+                    padding: EdgeInsets.only(right: 8.0),
+                    child: Icon(Icons.logout),
+                  ),
+                  Text('Wyloguj'),
+                ],
+              ),
+              onTap: () {
+                Navigator.pushReplacementNamed(
+                    context, '/login'); // Przejście do logowania
+              },
+            )
           ],
         ),
       ),

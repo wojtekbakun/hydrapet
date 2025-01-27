@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hydrapet/repository/schedule_model_repository.dart';
+import 'package:hydrapet/view/screens/login_page.dart';
+import 'package:hydrapet/view/screens/register_page.dart';
 import 'package:hydrapet/view/screens/settings_screen.dart';
 import 'package:hydrapet/view/screens/single_day_screen.dart';
 import 'package:hydrapet/view_model/schedule_view_model.dart';
@@ -21,8 +23,10 @@ void main() {
                   pickedDate: DateTime.now(),
                 ),
             '/settings': (context) => SettingsScreen(),
+            '/login': (context) => LoginPage(),
+            '/register': (context) => RegisterPage(),
           },
-          initialRoute: '/',
+          initialRoute: '/login',
         )),
   );
 }

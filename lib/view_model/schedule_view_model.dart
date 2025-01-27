@@ -34,7 +34,6 @@ class ScheduleViewModel extends ChangeNotifier {
   ScheduleViewModel({required this.repository}) {
     initScheduleViewModel();
     connectAndListenToMqtt();
-    // loadScheduleFromLocalStorage();
   }
 
   final ScheduleModel _defaultSchedule = ScheduleModel(
