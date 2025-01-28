@@ -154,7 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      'woda',
+                      '💦',
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     Expanded(
@@ -208,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      'bateria',
+                      '🔋',
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     Expanded(

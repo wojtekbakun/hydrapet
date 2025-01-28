@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hydrapet/model/device.dart';
 import 'package:hydrapet/model/mini_schedule_model.dart';
 import 'package:hydrapet/model/schedule_model.dart';
+import 'package:hydrapet/model/water_info.dart';
 import 'package:hydrapet/repository/device_repository.dart';
 import 'package:hydrapet/repository/schedule_model_repository.dart';
 import 'dart:io';
@@ -16,9 +17,10 @@ class ScheduleViewModel extends ChangeNotifier {
   MqttServerClient? mqttClient;
   String? _jwtToken;
   String? get jwtToken => _jwtToken;
+  WaterInfo? _currentWaterInfo;
 
   final DeviceRepository deviceRepository;
-  String? _selectedDeviceId;
+  String? _selectedDeviceId = '3';
   List<Device> _devices = [];
   String? get selectedDeviceId => _selectedDeviceId;
   List<Device> get devices => _devices;
@@ -331,6 +333,23 @@ class ScheduleViewModel extends ChangeNotifier {
     } catch (e) {
       debugPrint('Error fetching devices: $e');
       rethrow;
+    }
+  }
+
+  Future<void> fetchWaterInfo() async {
+    if (_jwtToken == null || _selectedDeviceId == null) {
+      throw Exception('Token or selected device ID is not available');
+    }
+
+    try {
+      _currentWaterInfo = await deviceRepository.getWaterInfo(
+        _jwtToken!,
+        int.parse(_selectedDeviceId!),
+      );
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Failed to fetch water info: $e');
+      throw e;
     }
   }
 
