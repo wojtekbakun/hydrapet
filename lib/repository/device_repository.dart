@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:hydrapet/model/deleted_alarm.dart';
 import 'package:hydrapet/model/device.dart';
@@ -30,7 +31,7 @@ class DeviceRepository {
   }
 
   Future<DeviceStatus> getDeviceStatus(String token, int deviceId) async {
-    final url = Uri.parse('$baseUrl/device/$deviceId/status');
+    final url = Uri.parse('$baseUrl/devices/$deviceId/status');
     final response = await http.get(
       url,
       headers: {
@@ -86,7 +87,8 @@ class DeviceRepository {
 
   Future<void> setDeviceWaterTarget(
       String token, int deviceId, int targetWeight) async {
-    final url = Uri.parse('$baseUrl/device/$deviceId/set-water');
+    final url = Uri.parse('$baseUrl/devices/$deviceId/set-water');
+    debugPrint('device id: $deviceId, target weight: $targetWeight');
     final response = await http.post(
       url,
       headers: {
@@ -100,11 +102,13 @@ class DeviceRepository {
 
     if (response.statusCode != 200) {
       throw Exception('Failed to set target water weight');
+    } else {
+      print('Set target water weight to $targetWeight');
     }
   }
 
   Future<WaterInfo> getWaterInfo(String token, int deviceId) async {
-    final url = Uri.parse('$baseUrl/device/$deviceId/get-water');
+    final url = Uri.parse('$baseUrl/devices/$deviceId/get-water');
     final response = await http.get(
       url,
       headers: {
@@ -123,7 +127,7 @@ class DeviceRepository {
 
   Future<DeletedAlarmResponse> deleteAlarm(
       String token, int deviceId, DateTime timestamp) async {
-    final url = Uri.parse('$baseUrl/device/$deviceId/delete-alarm');
+    final url = Uri.parse('$baseUrl/devices/$deviceId/delete-alarm');
     final response = await http.delete(
       url,
       headers: {
@@ -144,7 +148,7 @@ class DeviceRepository {
   }
 
   Future<String> pourWater(String token, int deviceId, int targetWeight) async {
-    final url = Uri.parse('$baseUrl/device/$deviceId/pour-water');
+    final url = Uri.parse('$baseUrl/devices/$deviceId/pour-water');
     final response = await http.post(
       url,
       headers: {
@@ -165,7 +169,7 @@ class DeviceRepository {
   }
 
   Future<String> setTare(String token, int deviceId) async {
-    final url = Uri.parse('$baseUrl/device/$deviceId/set-tare');
+    final url = Uri.parse('$baseUrl/devices/$deviceId/set-tare');
     final response = await http.post(
       url,
       headers: {

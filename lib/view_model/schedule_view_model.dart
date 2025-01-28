@@ -181,6 +181,7 @@ class ScheduleViewModel extends ChangeNotifier {
 
   void setMaxWaterAmount(int newMaxWaterAmount) {
     _maxWaterAmount = newMaxWaterAmount;
+
     notifyListeners();
   }
 
@@ -330,6 +331,27 @@ class ScheduleViewModel extends ChangeNotifier {
     } catch (e) {
       debugPrint('Error fetching devices: $e');
       rethrow;
+    }
+  }
+
+  Future<void> setDeviceWaterTarget(int targetWeight) async {
+    if (_jwtToken == null || _selectedDeviceId == null) {
+      throw Exception('Token or selected device ID is not available');
+    }
+
+    try {
+      debugPrint('Sending request to set water target...');
+      await deviceRepository.setDeviceWaterTarget(
+        _jwtToken!,
+        int.parse(_selectedDeviceId!),
+        targetWeight,
+      );
+      _maxWaterAmount = targetWeight;
+      notifyListeners();
+      debugPrint('Water target set successfully');
+    } catch (e) {
+      debugPrint('Failed to set device water target: $e');
+      throw e;
     }
   }
 

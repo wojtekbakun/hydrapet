@@ -86,8 +86,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 child: const Text('Anuluj'),
                               ),
                               TextButton(
-                                onPressed: () {
-                                  viewModel.setMaxWaterAmount(
+                                onPressed: () async {
+                                  await viewModel.setDeviceWaterTarget(
                                       int.parse(newWaterAmountController.text));
                                   Navigator.pop(context);
                                 },
@@ -139,7 +139,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
                 ListTile(
-                  title: const Text('Resetuj tary'),
+                  title: const Text('Reset tary'),
                   trailing: ElevatedButton(
                     onPressed: () {
                       viewModel.resetTare(3).then((message) {
