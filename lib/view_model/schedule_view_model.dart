@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:hydrapet/model/device.dart';
 import 'package:hydrapet/model/mini_schedule_model.dart';
+import 'package:hydrapet/model/schedule.dart';
 import 'package:hydrapet/model/schedule_model.dart';
 import 'package:hydrapet/model/water_info.dart';
 import 'package:hydrapet/repository/device_repository.dart';
-import 'package:hydrapet/repository/schedule_model_repository.dart';
+import 'package:hydrapet/repository/auth_repository.dart';
+import 'package:hydrapet/repository/schedule_repository.dart';
 import 'dart:io';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
@@ -25,8 +27,8 @@ class ScheduleViewModel extends ChangeNotifier {
   String? get selectedDeviceId => _selectedDeviceId;
   List<Device> get devices => _devices;
 
-  final List<ScheduleModel> _schedules = [];
-  List<ScheduleModel> get schedules => _schedules;
+  List<Schedule> _schedules = [];
+  List<Schedule> get schedules => _schedules;
 
   DateTime? _pickedDate = DateTime.now();
   DateTime? get pickedDate => _pickedDate;
@@ -46,10 +48,18 @@ class ScheduleViewModel extends ChangeNotifier {
   int _batteryLevel = 0;
   int get batteryLevel => _batteryLevel;
 
-  ScheduleRepository repository;
+  AuthRepository authRepository;
+  final ScheduleRepository repository;
+
   ScheduleViewModel(
-      {required this.repository, required this.deviceRepository}) {
+      {required this.authRepository,
+      required this.repository,
+      required this.deviceRepository}) {
     initScheduleViewModel();
+  }
+
+  Future<void> initScheduleViewModel() async {
+    _jwtToken = await authRepository.loadJwtToken();
   }
 
   final ScheduleModel _defaultSchedule = ScheduleModel(
@@ -77,20 +87,15 @@ class ScheduleViewModel extends ChangeNotifier {
 
   ScheduleModel get defaultSchedule => _defaultSchedule;
 
-  Future<void> initScheduleViewModel() async {
-    _jwtToken = await repository.loadJwtToken();
-    _schedules.add(_defaultSchedule);
-  }
-
   Future<void> saveJwtToken(String token) async {
     _jwtToken = token;
-    await repository.saveJwtToken(token);
+    await authRepository.saveJwtToken(token);
     notifyListeners();
   }
 
   Future<void> removeJwtToken() async {
     _jwtToken = null;
-    await repository.removeJwtToken();
+    await authRepository.removeJwtToken();
     notifyListeners();
   }
 
@@ -185,128 +190,6 @@ class ScheduleViewModel extends ChangeNotifier {
     _maxWaterAmount = newMaxWaterAmount;
 
     notifyListeners();
-  }
-
-  int getTotalWaterAmount() {
-    int totalWaterAmount = 0;
-    getSchedule()?.miniSchedules.forEach((element) {
-      totalWaterAmount += element.waterAmount.floor();
-    });
-    return totalWaterAmount;
-  }
-
-  void removeMiniSchedule(int index) {
-    getSchedule()?.miniSchedules.removeAt(index);
-    notifyListeners();
-  }
-
-  void setPickedDate(DateTime? date) {
-    _pickedDate = date;
-    debugPrint('Wybrana data: $date');
-    notifyListeners();
-  }
-
-  int addNewSchedule(MiniScheduleModel newMiniSchedule) {
-    if (getTotalWaterAmount() + newMiniSchedule.waterAmount > maxWaterAmount) {
-      debugPrint('Przekroczono maksymalną ilość wody');
-      return -1;
-    }
-
-    if (_schedules.isEmpty) {
-      _schedules.add(ScheduleModel(date: _pickedDate, miniSchedule: []));
-      addNewMiniSchedule(_schedules[0], newMiniSchedule);
-      return 0;
-    }
-    for (var i = 0; i < _schedules.length;) {
-      if (_schedules[i].date == _pickedDate) {
-        debugPrint('Znaleziono datę: $_pickedDate, dodano nowy miniSchedule');
-        addNewMiniSchedule(_schedules[i], newMiniSchedule);
-        return 0;
-      } else {
-        i++;
-        if (i == schedules.length) {
-          debugPrint('Nie znaleziono daty: $_pickedDate, dodano nową');
-          _schedules.add(ScheduleModel(
-              date: _pickedDate, miniSchedule: [newMiniSchedule]));
-          addNewMiniSchedule(_schedules[i], newMiniSchedule);
-          return 0;
-        }
-      }
-    }
-    debugPrint("time in vm: $_pickedDate, schedule: ${schedules.length}");
-    return 0;
-  }
-
-  ScheduleModel? getSchedule() {
-    if (_pickedDate == null) {
-      return _defaultSchedule;
-    }
-    for (var i = 0; i < _schedules.length; i++) {
-      if (_schedules[i].date == _pickedDate) {
-        debugPrint('Znaleziono date: ${_schedules[i].date}');
-        debugPrint('Znaleziono miniSchedule: ${_schedules[i].miniSchedules}');
-        debugPrint('Łączna ilość wody: ${_schedules[i].totalWaterAmount}');
-        return _schedules[i];
-      } else {
-        _schedules.add(ScheduleModel(date: _pickedDate, miniSchedule: []));
-        debugPrint('Dodano date: ${_schedules[i].date}');
-      }
-    }
-    debugPrint('Nie znaleziono schedule dla daty: $_pickedDate');
-    return null;
-  }
-
-  List<MiniScheduleModel> getMiniSchedules() {
-    if (getSchedule() != null) {
-      return getSchedule()!.miniSchedules;
-    } else {
-      return [];
-    }
-  }
-
-  int editMiniSchedule(int index, MiniScheduleModel newMiniSchedule) {
-    if (getTotalWaterAmount() -
-            getSchedule()!.miniSchedules[index].waterAmount +
-            newMiniSchedule.waterAmount >
-        maxWaterAmount) {
-      debugPrint('Przekroczono maksymalną ilość wody');
-      return -1;
-    }
-    getSchedule()?.miniSchedules[index] = newMiniSchedule;
-
-    notifyListeners();
-    return 0;
-  }
-
-  int doOneTimeWatering() {
-    if (getTotalWaterAmount() + oneTimeWaterAmount > maxWaterAmount) {
-      debugPrint('Przekroczono maksymalną ilość wody');
-      return -1;
-    }
-    addNewMiniSchedule(
-        getSchedule()!,
-        MiniScheduleModel(
-          time: TimeOfDay.now(),
-          waterAmount: _oneTimeWaterAmount,
-        ));
-    return 0;
-  }
-
-  void addNewMiniSchedule(
-      ScheduleModel schedule, MiniScheduleModel newMiniSchedule) {
-    schedule.miniSchedules.add(newMiniSchedule);
-    notifyListeners();
-  }
-
-  String getHoursAndMinutesOfMiniSchedules() {
-    _pickedDate = null;
-    String hoursAndMinutes = '';
-    getMiniSchedules().forEach((element) {
-      // display hours and minutes in format: 'hh:mm ' with 0 in front of single digit numbers
-      hoursAndMinutes +=
-          '${element.time.hour.toString().padLeft(2, '0')}:${element.time.minute.toString().padLeft(2, '0')} ';
-    });
-    return hoursAndMinutes;
   }
 
   bool _devicesLoaded = false;
@@ -451,6 +334,69 @@ class ScheduleViewModel extends ChangeNotifier {
       return response.body;
     } else {
       throw Exception('Ustawienie czasu urządzenia nie powiodło się');
+    }
+  }
+
+  bool _schedulesLoaded = false;
+
+  Future<void> fetchSchedules() async {
+    if (_schedulesLoaded) return; // Unikaj wielokrotnego ładowania
+    _schedulesLoaded = true;
+
+    if (_jwtToken == null || _selectedDeviceId == null) {
+      throw Exception('Token or Device ID is not set');
+    }
+
+    try {
+      _schedules = await repository.getSchedules(
+          _jwtToken!, int.parse(_selectedDeviceId!));
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Failed to fetch schedules: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> addSchedule(String day, String time, int amount) async {
+    if (_jwtToken == null || _selectedDeviceId == null) {
+      throw Exception('Token or Device ID is not set');
+    }
+
+    try {
+      await repository.addSchedule(
+          _jwtToken!, int.parse(_selectedDeviceId!), day, time, amount);
+      await fetchSchedules(); // Odśwież listę harmonogramów
+    } catch (e) {
+      debugPrint('Failed to add schedule: $e');
+      throw e;
+    }
+  }
+
+  Future<void> deleteSchedule(int scheduleId) async {
+    if (_jwtToken == null) {
+      throw Exception('Token is not set');
+    }
+
+    try {
+      await repository.deleteSchedule(_jwtToken!, scheduleId);
+      await fetchSchedules(); // Odśwież listę harmonogramów
+    } catch (e) {
+      debugPrint('Failed to delete schedule: $e');
+      throw e;
+    }
+  }
+
+  Future<void> sendScheduleToDevice() async {
+    if (_jwtToken == null || _selectedDeviceId == null) {
+      throw Exception('Token or Device ID is not set');
+    }
+
+    try {
+      await repository.sendScheduleToDevice(
+          _jwtToken!, int.parse(_selectedDeviceId!));
+    } catch (e) {
+      debugPrint('Failed to send schedule to device: $e');
+      throw e;
     }
   }
 }

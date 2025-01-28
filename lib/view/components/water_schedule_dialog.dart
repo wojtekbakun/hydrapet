@@ -67,16 +67,7 @@ class WaterScheduleDialog {
                 if (waterAmountController.text.isNotEmpty) {
                   final waterAmount =
                       int.tryParse(waterAmountController.text) ?? 0;
-                  int retVal = isEdit
-                      ? viewModel.editMiniSchedule(
-                          index ?? 0,
-                          MiniScheduleModel(
-                              time: pickedTimeOfDay, waterAmount: waterAmount),
-                        )
-                      : viewModel.addNewSchedule(
-                          MiniScheduleModel(
-                              time: pickedTimeOfDay, waterAmount: waterAmount),
-                        );
+                  final retVal = isEdit;
                   Navigator.pop(context);
                   retVal == 0
                       ? null

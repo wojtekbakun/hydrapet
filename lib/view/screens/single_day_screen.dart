@@ -46,7 +46,7 @@ class _SingleDayScreenState extends State<SingleDayScreen> {
                           style: Theme.of(context).textTheme.headlineSmall,
                         ),
                         Text(
-                          'Wykorzystano ${viewModel.getTotalWaterAmount()}/${viewModel.maxWaterAmount}ml',
+                          'Wykorzystano x}/${viewModel.maxWaterAmount}ml',
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                       ],
@@ -65,7 +65,7 @@ class _SingleDayScreenState extends State<SingleDayScreen> {
                 Expanded(
                   child: ListView.builder(
                     shrinkWrap: true,
-                    itemCount: viewModel.getMiniSchedules().length,
+                    itemCount: 0,
                     itemBuilder: (BuildContext context, int index) {
                       return TimeForWaterRefilling(
                         viewModel: viewModel,

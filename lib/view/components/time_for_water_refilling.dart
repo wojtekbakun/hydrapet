@@ -31,7 +31,7 @@ class TimeForWaterRefilling extends StatelessWidget {
                   ),
                   TextButton(
                     onPressed: () {
-                      viewModel.removeMiniSchedule(index);
+                      // viewModel.removeMiniSchedule(index);
                       Navigator.pop(context);
                     },
                     child: const Text('Usuń'),
@@ -43,11 +43,11 @@ class TimeForWaterRefilling extends StatelessWidget {
       child: Card(
         child: ListTile(
           title: Text(
-            '${viewModel.getMiniSchedules()[index].waterAmount}ml',
+            'x ml',
           ),
           subtitle: Text(
             // display time with 0 in front if needed
-            '${viewModel.getMiniSchedules()[index].time.hour.toString().padLeft(2, '0')}:${viewModel.getMiniSchedules()[index].time.minute.toString().padLeft(2, '0')}',
+            'x',
           ),
           trailing: IconButton(
             icon: const Icon(Icons.edit),

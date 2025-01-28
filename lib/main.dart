@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hydrapet/repository/device_repository.dart';
-import 'package:hydrapet/repository/schedule_model_repository.dart';
+import 'package:hydrapet/repository/auth_repository.dart';
+import 'package:hydrapet/repository/schedule_repository.dart';
 import 'package:hydrapet/view/screens/login_page.dart';
 import 'package:hydrapet/view/screens/register_page.dart';
+import 'package:hydrapet/view/screens/schedule_screen.dart';
 import 'package:hydrapet/view/screens/settings_screen.dart';
 import 'package:hydrapet/view/screens/single_day_screen.dart';
 import 'package:hydrapet/view/screens/home_screen.dart';
@@ -12,10 +14,13 @@ import 'package:provider/provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final scheduleRepository = ScheduleRepository();
+  final authRepository = AuthRepository();
   final deviceRepository = DeviceRepository('http://0.0.0.0:3000');
+  final repository = ScheduleRepository('http://0.0.0.0:3000');
   final scheduleViewModel = ScheduleViewModel(
-      repository: scheduleRepository, deviceRepository: deviceRepository);
+      authRepository: authRepository,
+      repository: repository,
+      deviceRepository: deviceRepository);
 
   // Inicjalizacja tokenu JWT
   await scheduleViewModel.initScheduleViewModel();
@@ -49,6 +54,7 @@ class MyApp extends StatelessWidget {
         '/settings': (context) => SettingsScreen(),
         '/login': (context) => LoginPage(),
         '/register': (context) => RegisterPage(),
+        '/schedule': (context) => ScheduleScreen()
       },
       initialRoute: initialRoute,
     );

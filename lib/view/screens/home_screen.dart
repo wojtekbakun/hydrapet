@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hydrapet/repository/my_mqtt_client.dart';
+import 'package:hydrapet/view/screens/schedule_screen.dart';
 import 'package:hydrapet/view/screens/settings_screen.dart';
 import 'package:hydrapet/view/screens/single_day_screen.dart';
 import 'package:hydrapet/view_model/schedule_view_model.dart';
@@ -68,20 +69,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               onTap: () async {
-                Navigator.pop(context);
-                final pickedDate = await displayDatePicker(context);
-                if (pickedDate != null) {
-                  viewModel.setPickedDate(pickedDate);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => SingleDayScreen(
-                              pickedDate: pickedDate,
-                            )),
-                  );
-                } else {
-                  debugPrint('Nie wybrano daty');
-                }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ScheduleScreen(),
+                  ),
+                );
               },
             ),
             ListTile(
@@ -173,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             onPressed: () {
                               debugPrint(
                                   'pcked date ${viewModel.pickedDate.toString()}');
-                              int retVal = viewModel.doOneTimeWatering();
+                              int retVal = 0;
 
                               retVal == -1
                                   ? ScaffoldMessenger.of(context).showSnackBar(

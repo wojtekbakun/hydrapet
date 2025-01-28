@@ -15,8 +15,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     @override
     void initState() {
       super.initState();
-
       viewModel.fetchDevices(); // Wywołaj raz przy inicjalizacji
+    }
+
+    @override
+    void dispose() {
+      newWaterAmountController.dispose();
+      super.dispose();
     }
 
     return Scaffold(
