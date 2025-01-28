@@ -193,30 +193,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      '🔋',
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          '${viewModel.getBatteryLevel()}%',
-                          style: const TextStyle(
-                            fontSize: 50,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
         ),

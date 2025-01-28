@@ -147,7 +147,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: const Text('Reset tary'),
                   trailing: ElevatedButton(
                     onPressed: () {
-                      viewModel.resetTare(3).then((message) {
+                      viewModel
+                          .resetTare(
+                              int.parse(viewModel.selectedDeviceId ?? '5'))
+                          .then((message) {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                           content: Text(message),
                         ));
@@ -223,7 +226,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                         .toUtc()
                                         .toIso8601String();
 
-                                    viewModel.deleteAlarm(3, formattedDateTime);
+                                    viewModel.deleteAlarm(
+                                        (int.parse(
+                                            viewModel.selectedDeviceId ?? '5')),
+                                        formattedDateTime);
                                   }
                                   Navigator.pop(context);
                                 },
@@ -240,7 +246,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: const Text('Pobierz czas urządzenia'),
                   trailing: ElevatedButton(
                     onPressed: () {
-                      viewModel.getDeviceTime(3).then((time) {
+                      viewModel
+                          .getDeviceTime(
+                              (int.parse(viewModel.selectedDeviceId ?? '5')))
+                          .then((time) {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                           content: Text(time),
                         ));
@@ -315,7 +324,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                         .toUtc()
                                         .toIso8601String();
                                     viewModel.setDeviceTime(
-                                        3, formattedDateTime);
+                                        (int.parse(
+                                            viewModel.selectedDeviceId ?? '5')),
+                                        formattedDateTime);
                                     ScaffoldMessenger.of(context)
                                         .showSnackBar(SnackBar(
                                       content: Text(

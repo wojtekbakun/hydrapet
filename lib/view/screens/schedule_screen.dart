@@ -19,25 +19,51 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   Widget build(BuildContext context) {
     final viewModel = Provider.of<ScheduleViewModel>(context);
 
+    // Grupowanie harmonogramów według dnia
+    final groupedSchedules =
+        viewModel.schedules.fold<Map<String, List<dynamic>>>(
+      {},
+      (map, schedule) {
+        map.putIfAbsent(schedule.day, () => []).add(schedule);
+        return map;
+      },
+    );
+
+    final sortedDays = groupedSchedules.keys.toList()..sort();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Harmonogram'),
       ),
-      body: viewModel.schedules.isEmpty
+      body: sortedDays.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
-              itemCount: viewModel.schedules.length,
+              itemCount: sortedDays.length,
               itemBuilder: (context, index) {
-                final schedule = viewModel.schedules[index];
-                return ListTile(
-                  title: Text(
-                      'Czas: ${schedule.time}, Ilość: ${schedule.amount} ml'),
-                  subtitle: Text('Data: ${schedule.day}'),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () async {
-                      await viewModel.deleteSchedule(schedule.scheduleId);
-                    },
+                final day = sortedDays[index];
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DailyScheduleScreen(
+                          day: day,
+                          schedules: groupedSchedules[day]!,
+                        ),
+                      ),
+                    );
+                  },
+                  child: Card(
+                    margin:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        day.substring(5),
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.normal),
+                      ),
+                    ),
                   ),
                 );
               },
@@ -145,6 +171,43 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           );
         },
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+class DailyScheduleScreen extends StatelessWidget {
+  final String day;
+  final List<dynamic> schedules;
+
+  const DailyScheduleScreen({
+    required this.day,
+    required this.schedules,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Harmonogram: $day'),
+      ),
+      body: ListView.builder(
+        itemCount: schedules.length,
+        itemBuilder: (context, index) {
+          final schedule = schedules[index];
+          return ListTile(
+            title: Text('Czas: ${schedule.time}, Ilość: ${schedule.amount} ml'),
+            trailing: IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: () async {
+                final viewModel =
+                    Provider.of<ScheduleViewModel>(context, listen: false);
+                await viewModel.deleteSchedule(schedule.scheduleId);
+                Navigator.pop(context);
+              },
+            ),
+          );
+        },
       ),
     );
   }

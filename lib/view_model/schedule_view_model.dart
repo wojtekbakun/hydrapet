@@ -22,7 +22,7 @@ class ScheduleViewModel extends ChangeNotifier {
   WaterInfo? _currentWaterInfo;
 
   final DeviceRepository deviceRepository;
-  String? _selectedDeviceId = '3';
+  String? _selectedDeviceId = '5';
   List<Device> _devices = [];
   String? get selectedDeviceId => _selectedDeviceId;
   List<Device> get devices => _devices;
@@ -337,12 +337,7 @@ class ScheduleViewModel extends ChangeNotifier {
     }
   }
 
-  bool _schedulesLoaded = false;
-
   Future<void> fetchSchedules() async {
-    if (_schedulesLoaded) return; // Unikaj wielokrotnego ładowania
-    _schedulesLoaded = true;
-
     if (_jwtToken == null || _selectedDeviceId == null) {
       throw Exception('Token or Device ID is not set');
     }
@@ -366,6 +361,7 @@ class ScheduleViewModel extends ChangeNotifier {
       await repository.addSchedule(
           _jwtToken!, int.parse(_selectedDeviceId!), day, time, amount);
       await fetchSchedules(); // Odśwież listę harmonogramów
+      notifyListeners();
     } catch (e) {
       debugPrint('Failed to add schedule: $e');
       throw e;
@@ -380,6 +376,7 @@ class ScheduleViewModel extends ChangeNotifier {
     try {
       await repository.deleteSchedule(_jwtToken!, scheduleId);
       await fetchSchedules(); // Odśwież listę harmonogramów
+      notifyListeners();
     } catch (e) {
       debugPrint('Failed to delete schedule: $e');
       throw e;
